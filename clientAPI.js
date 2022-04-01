@@ -3,6 +3,9 @@ const ip = require('ip');
 const { app } = require('./web');
 const { clientSQL } = require('./main');
 
+// 테스트용 라우터
+app.get('/', (req, res) => res.send('<h1>Node Server Start</h1><h2>접속 IP: ' + ip.address() + '</h2>'));
+app.get('/clientSQL/:SQL', clientSQL);
 
 // API
 // app.get('/api/init', (req, res) => res.send({
@@ -22,12 +25,10 @@ const { clientSQL } = require('./main');
 // app.get('/api/hardware', getHardwareList);
 // console.log(app);
 
-// 테스트용 라우터
-app.get('/clientSQL/:SQL', clientSQL);
 
 // 기타
-app.get('*', (req, res) => res.send({
-  state: 404, 
-  ip: ip.address(), 
-  msg: '페이지를 찾을 수 없습니다.' 
-}));
+// app.get('*', (req, res) => res.send({
+//   state: 404, 
+//   ip: ip.address(), 
+//   msg: '페이지를 찾을 수 없습니다.' 
+// }));

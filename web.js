@@ -1,6 +1,7 @@
 // 자바스크립트 엄격모드 ON
 'use strict';
 
+const path = require('path');
 const express = require('express');
 const app = express();
 const mysql = require('mysql');
@@ -15,7 +16,7 @@ require('./clientAPI');
 
 // 엔진 셋팅
 app.set('port', 8001);
-app.use('/test', express.static(__dirname + '../view'));
+app.use('/test', express.static(__dirname + '/view'));
 
 // 실행
 const { serverStart, dbConnect } = require('./main');
