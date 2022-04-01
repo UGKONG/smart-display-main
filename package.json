@@ -2,9 +2,9 @@
   "name": "smartstreetlight",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/index.js",
+  "main": "./web.js",
   "scripts": {
-    "start": "nodemon ./src/index.js"
+    "start": "node ./web.js"
   },
   "keywords": [],
   "author": "",
