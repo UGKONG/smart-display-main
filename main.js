@@ -6,7 +6,7 @@ const ip = require('ip');
 const fs = require('fs');
 const request = require('request');
 const config_api = require('./config/api.json');
-const { db } = require('./index');
+const { db } = require('./web');
 const {
   apiErrorCodeList,
   sidoNameList,
