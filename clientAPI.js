@@ -1,6 +1,6 @@
 // 필요 모듈
 const ip = require('ip');
-const { app } = require('./index');
+const { app } = require('./web');
 const { clientSQL } = require('./main');
 
 

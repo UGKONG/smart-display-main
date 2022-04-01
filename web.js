@@ -15,7 +15,7 @@ require('./clientAPI');
 
 // 엔진 셋팅
 app.set('port', 8001);
-app.use('/test', express.static(__dirname + '../client'));
+app.use('/test', express.static(__dirname + '../view'));
 
 // 실행
 const { serverStart, dbConnect } = require('./main');
