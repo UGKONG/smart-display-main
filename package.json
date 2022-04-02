@@ -4,6 +4,7 @@
   "description": "",
   "main": "./web.js",
   "scripts": {
+    "dev": "nodemon ./web.js",
     "start": "node ./web.js"
   },
   "keywords": [],
