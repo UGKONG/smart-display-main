@@ -232,7 +232,7 @@ function serverStart () {
     ':: ' + useNow() + ' -> Nodejs 서버 연결 성공',
     ':: ' + useNow() + ' -> Nodejs 서버 연결 성공'
   );
-  timeProcess();
+  // timeProcess();
 }
 
 // Database 연결 함수
@@ -242,6 +242,7 @@ function dbConnect (err) {
     ':: ' + useNow() + ' -> 데이터베이스 연결 성공',
     ':: ' + useNow() + ' -> 데이터베이스 연결 성공'
   );
+  
 }
 
 // log.txt에 log 저장

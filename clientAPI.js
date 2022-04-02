@@ -1,10 +1,21 @@
 // 필요 모듈
 const ip = require('ip');
-const { app } = require('./web');
+const { app, db } = require('./web');
 const { clientSQL } = require('./main');
 
 // 테스트용 라우터
-app.get('/', (req, res) => res.send('<h1>Node Server Start</h1><h2>접속 IP: ' + ip.address() + '</h2>'));
+app.get('/', (req, res) => {
+  //test
+  db.query('SELECT * FROM test', (err, result) => {
+    if (err) return res.send('MySQL Error');
+
+    res.send(
+      '<h1>Node Server Start</h1>' + 
+      '<h2>접속 IP: ' + ip.address() + '</h2>' +
+      '<h3>MySQL Test 결과: ' + JSON.stringify(result) + '</h3>'
+    )
+  })
+});
 app.get('/clientSQL/:SQL', clientSQL);
 
 // API
