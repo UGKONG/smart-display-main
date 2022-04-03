@@ -2,41 +2,41 @@
 const requestIp = require('request-ip');
 const { db } = require('./web');
 
-module.exports = { dbIsConnect };
+module.exports = { dbIsConnect, pageNotFound };
 
+// ROOT ('/') 요청 시
 const indexHTML = ({ ipAddress, result }) => {
-  const stateStyle = `background-color: ${result ? '#33db33' : '#ff4b4b'}`;
+  const dbstateStyle = `background-color: ${result ? '#33db33' : '#ff4b4b'}`;
   const tag = `
-    <style>
-      * { list-style: none; padding: 0; font-family: monospace; }
-      html, body { width: 100%; height: 100%; }
-      body { color: #fff; background-color: #333; display: flex; align-items: center; justify-content: center; flex-flow: column; }
-      img { width: 300px; margin-bottom: 40px; } h1 { font-size: 28px; }
-      li { margin-bottom: 6px; font-size: 24px; }
-      span { display: inline-block; width: 60px; }
-      span.type { width: 120px; }
-      span.dot { width: 10px; height: 10px; border-radius: 100%; }
-    </style>
-    <body>
+    <head>
       <title>스마트 가로등</title>
-      <img src='/logo.png' /><h1>Access IP: ${ipAddress}</h1><h1 style='margin-bottom: 0;'>Connect State</h1>
+      <link rel='stylesheet' href='index.css' />
+    </head>
+    <body>
+      <img src='logo.png' /><h1>Access IP: ${ipAddress}</h1><h1 style='margin-bottom: 0;'>Connect State</h1>
       <ul>
-        <li><span class='type'>Server</span><span class='dot' style='${stateStyle}'></span></li>
-        <li><span class='type'>MySQL</span><span class='dot' style='${stateStyle}'></span></li>
+        <li><span class='type'>Server</span><span class='dot' style='background-color: #33db33'></span></li>
+        <li><span class='type'>MySQL</span><span class='dot' style='${dbstateStyle}'></span></li>
       </ul>
     </body>
   `;
   return tag;
 }
 
+// DB 연결상태 확인
 function dbIsConnect (req, res) {
   db.query('SELECT * FROM test', (err) => {
-    const ipAddress = requestIp.getClientIp(req);
-    let result = err ? false : true;
-    res.send(indexHTML({ ipAddress, result }));
-  })
+    res.send(indexHTML({
+      ipAddress: requestIp.getClientIp(req),
+      result: err ? false : true
+    }));
+  });
 }
 
+// 404 페이지를 찾을 수 없습니다.
+function pageNotFound (req, res) {
+  res.redirect('/');
+}
 
 
 // IP 필터 함수

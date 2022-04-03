@@ -1,6 +1,6 @@
 // 필요 모듈
 const { app } = require('./web');
-const { dbIsConnect } = require('./client');
+const { dbIsConnect, pageNotFound } = require('./client');
 
 // 테스트용 라우터
 app.get('/', dbIsConnect);
@@ -13,8 +13,4 @@ app.get('/', dbIsConnect);
 
 
 // 기타
-// app.get('*', (req, res) => res.send({
-//   state: 404, 
-//   ip: ip.address(), 
-//   msg: '페이지를 찾을 수 없습니다.' 
-// }));
+app.get('*', pageNotFound);

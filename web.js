@@ -6,18 +6,18 @@ const app = express();
 const mysql = require('mysql');
 const db_config = require('./config/db.json');
 const db = mysql.createConnection(db_config);
+const port = 8001;
 
 // 서버엔진, 데이터베이스 내보내기
-module.exports = { db, app }
-
-// 클라이언트 API 불러오기
-require('./router');
+module.exports = { db, app };
 
 // 엔진 셋팅
-app.set('port', 8001);
 app.use(express.static(__dirname + '/public'));
 
 // 실행
 const { serverStart, dbConnect } = require('./main');
 db.connect(dbConnect);
-app.listen(app.get('port'), '0.0.0.0', serverStart);
+app.listen(port, '0.0.0.0', serverStart);
+
+// 클라이언트 API 불러오기
+require('./router');
