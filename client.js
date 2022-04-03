@@ -11,13 +11,14 @@ const indexHTML = ({ ipAddress, result }) => {
       * { list-style: none; padding: 0; font-family: monospace; }
       html, body { width: 100%; height: 100%; }
       body { color: #fff; background-color: #333; display: flex; align-items: center; justify-content: center; flex-flow: column; }
-      img { width: 300px; } h1 { font-size: 28px; }
+      img { width: 300px; margin-bottom: 40px; } h1 { font-size: 28px; }
       li { margin-bottom: 6px; font-size: 24px; }
       span { display: inline-block; width: 60px; }
       span.type { width: 120px; }
       span.dot { width: 10px; height: 10px; border-radius: 100%; }
     </style>
     <body>
+      <title>스마트 가로등</title>
       <img src='/logo.png' /><h1>Access IP: ${ipAddress}</h1><h1 style='margin-bottom: 0;'>Connect State</h1>
       <ul>
         <li><span class='type'>Server</span><span class='dot' style='${stateStyle}'></span></li>
