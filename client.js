@@ -18,7 +18,7 @@ const welcomeHTML = ({ ipAddress, result }) => {
       span.dot { width: 8px; height: 8px; border-radius: 100%; }
     </style>
     <body>
-      <img src='/logo.png' /><h1>Node Server</h1><h2>Access IP: ${ipAddress}</h2><h2>Connect State</h2>
+      <img src='/logo.png' /><h1>Node Server</h1><h2>Access IP: ${ipAddress}</h2><h2 style='margin-bottom: 0;'>Connect State</h2>
       <ul>
         <li><span class='type'>Server</span><span class='dot' style='${stateStyle}'></span></li>
         <li><span class='type'>MySQL</span><span class='dot' style='${stateStyle}'></span></li>
