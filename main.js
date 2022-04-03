@@ -1,8 +1,9 @@
-module.exports = { useNow, serverStart, dbConnect, clientSQL }
+module.exports = { useNow, serverStart, dbConnect }
 
 let timeProcessCount = 0;
 let requestCount = 0;
 const ip = require('ip');
+const requestIp = require('request-ip');
 const fs = require('fs');
 const request = require('request');
 const config_api = require('./config/api.json');
@@ -12,12 +13,9 @@ const {
   sidoNameList,
   nowWeatherCategoryList,
   nowDustCategoryList,
-} = require('./static.json');
+} = require('./public/static.json');
 
-
-// 현재 날씨 상태
-// 날짜 & 시간 셋팅
-// 등록된 장비 위치 좌표마다 날씨 정보 GET
+// 현재 날씨 상태 날짜 & 시간 셋팅
 function getNowWeatherTimeSet () {
   let dateTime = useNow({ hour: 0, format: false });
   let [date, time] = dateTime.split(' ');
@@ -29,7 +27,7 @@ function getNowWeatherTimeSet () {
     SELECT DISTINCT b.NX, b.NY FROM 
     hardware_list AS a LEFT JOIN location_list AS b 
     ON a.LOCATION_ID = b.ID
-    `, (err, result) => {
+  `, (err, result) => {
     if (err) return log('위치 정보 조회 요청에 실패하였습니다.', err);
   
     result.forEach(loc => getNowWeather({ date, time, loc }));
@@ -186,21 +184,6 @@ function newNowDust (data, item) {
       
     }
   });
-}
-
-// 클라이언트 SQL 실행 함수
-function clientSQL (req, res) {
-  let val = req.params.SQL;
-  log('Node SQL Client에서 Query문을 요청하였습니다.\nQuery: ' + val);
-  db.query(val, (err, result) => {
-    if (err) {
-      log('Node SQL Client에서 Query문 시도에 실패하였습니다.');
-      res.send(err);
-      return;
-    }
-    log('Node SQL Client에서 Query문을 요청에 성공하였습니다.');
-    res.send(result);
-  })
 }
 
 // 일정 시간마다 실행할 함수들
