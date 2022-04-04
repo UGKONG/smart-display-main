@@ -188,14 +188,13 @@ function getFunctions () {
 
 // Time Process
 function timeProcess () {
-
   getNowWeatherTimeSet();
 
   setInterval(() => {
     let minutes = new Date().getMinutes();
     if (minutes != config_api.getMinutes) return;
     timeProcessCount++;
-    console.log('Time Process가 실행되었습니다.. (' + timeProcessCount + ')');
+    log('Time Process가 실행되었습니다.. (' + timeProcessCount + ')');
     getFunctions();
   }, 60000);
 }
