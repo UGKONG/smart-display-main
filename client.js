@@ -2,10 +2,18 @@
 const requestIp = require('request-ip');
 const { db } = require('./web');
 
-module.exports = { dbIsConnect, pageNotFound };
+module.exports = { dbIsConnect, pageNotFound, logView };
 
 // ROOT ('/') 요청 시
-const indexHTML = ({ ipAddress, result }) => {
+const indexHTML = ({
+  ipAddress, 
+  result, 
+  nowWeatherDate, 
+  shortWeatherDate, 
+  longWeatherDate, 
+  nowDustDate, 
+  shortDustDate
+}) => {
   const dbstateStyle = `background-color: ${result ? '#33db33' : '#ff4b4b'}`;
   const tag = `
     <head>
@@ -18,6 +26,14 @@ const indexHTML = ({ ipAddress, result }) => {
         <li><span class='type'>Server</span><span class='dot' style='background-color: #33db33'></span></li>
         <li><span class='type'>MySQL</span><span class='dot' style='${dbstateStyle}'></span></li>
       </ul>
+      <h1 style='margin-bottom: 0;'>Last API Request</h1>
+      <ul class='api'>
+        <li><span class='category'>초단기실황</span><span class='dateTime'>${nowWeatherDate}</span></li>
+        <li><span class='category'>단기예보</span><span class='dateTime'>${shortWeatherDate}</span></li>
+        <li><span class='category'>중기예보</span><span class='dateTime'>${longWeatherDate}</span></li>
+        <li><span class='category'>실시간 미세먼지</span><span class='dateTime'>${nowDustDate}</span></li>
+        <li><span class='category'>미세먼지 주간예보</span><span class='dateTime'>${shortDustDate}</span></li>
+      </ul>
     </body>
   `;
   return tag;
@@ -25,11 +41,46 @@ const indexHTML = ({ ipAddress, result }) => {
 
 // DB 연결상태 확인
 function dbIsConnect (req, res) {
-  db.query('SELECT * FROM test', (err) => {
-    res.send(indexHTML({
+  db.query(`
+    SELECT DATE,TIME FROM now_weather ORDER BY ID DESC LIMIT 1;
+  `, (err, result) => {
+    let data = result[0];
+    let Y = data?.DATE?.slice(0, 4);
+    let M = data?.DATE?.slice(4, 6);
+    let D = data?.DATE?.slice(6, 8);
+    let h = data?.TIME?.slice(0, 2);
+    let m = data?.TIME?.slice(2, 4);
+
+    let HTML = indexHTML({
       ipAddress: requestIp.getClientIp(req),
-      result: err ? false : true
-    }));
+      result: err ? false : true,
+      nowWeatherDate: err ? '-' : Y + '-' + M + '-' + D + ' ' + h + ':' + m,
+      shortWeatherDate: '-',
+      longWeatherDate: '-',
+      nowDustDate: '-',
+      shortDustDate: '-',
+    })
+    err && console.log(err);
+    res.send(HTML);
+  });
+}
+
+// log View 페이지
+function logView (req, res) {
+  db.query('SELECT * FROM log', (err, result) => {
+    if (err) return log('log 리스트 조회에 실패하였습니다.', err);
+    let tag = '';
+    result.reverse().forEach(item => {
+      tag += `<li style='margin-bottom: 10px;'>${item.DATE_TIME} :: ${item.DESCRIPTION}</li>`;
+    });
+    res.send(`
+      <style>
+        * { margin: 0; padding: 0; }
+        body { background-color: #333; color: #fff; }
+      </style>
+      <p style='padding: 10px 10px 0px;font-weight: 700;'>최신순 정렬</p>
+      <ul style='padding: 10px 20px;'>${tag}</ul>
+    `);
   });
 }
 

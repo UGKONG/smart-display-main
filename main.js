@@ -21,7 +21,6 @@ function getNowWeatherTimeSet () {
   let [date, time] = dateTime.split(' ');
   time = time.slice(0, 2);
   time = time + '00';
-  console.log(date, time, '현재 날씨 데이터를 요청합니다.');
 
   db.query(`
     SELECT DISTINCT b.NX, b.NY FROM 
@@ -102,10 +101,7 @@ function newNowWeather ({ data, loc, date, time }) {
       `, (err, result) => {
         if (err) return log('초단기실황 신규 데이터 삽입에 실패하였습니다.', err);
 
-        log(
-          ':: ' + useNow() + ' -> 초단기실황: 새로운 데이터로 추가됨',
-          ':: ' + useNow() + ' -> 초단기실황: 새로운 데이터로 추가됨'
-        );
+        log('초단기실황: 새로운 데이터로 추가됨');
       });
 
     } else {  // 기존 수정
@@ -123,10 +119,7 @@ function newNowWeather ({ data, loc, date, time }) {
       `, (err, result) => {
         if (err) return log('초단기실황 신규 데이터 업데이트에 실패하였습니다', err)
 
-        log(
-          ':: ' + useNow() + ' -> 초단기실황: 새로운 데이터로 교체됨',
-          ':: ' + useNow() + ' -> 초단기실황: 새로운 데이터로 교체됨'
-        );
+        log('초단기실황: 새로운 데이터로 교체됨');
       });
     }
   });
@@ -211,42 +204,31 @@ function timeProcess () {
 function serverStart () {
 
   console.clear();
-  log(
-    ':: ' + useNow() + ' -> Nodejs 서버 연결 성공',
-    ':: ' + useNow() + ' -> Nodejs 서버 연결 성공'
-  );
+  log('Nodejs 서버 연결 성공');
   timeProcess();
 }
 
 // Database 연결 함수
 function dbConnect (err) {
   if (err) return log('데이터베이스 연결에 실패하였습니다.', err);
-  log(
-    ':: ' + useNow() + ' -> 데이터베이스 연결 성공',
-    ':: ' + useNow() + ' -> 데이터베이스 연결 성공'
-  );
-  
+  log('데이터베이스 연결 성공');
 }
 
 // log.txt에 log 저장
 function log (logText = '', error) {
-  // let saveText = ':: ' + useNow() + ' -> ' + logText + '\n';
   db.query(`
-    INSERT INTO log (DATE_TIME,DESCRIPTION) VALUES ('${useNow()}','${logText + '\n'}');
+    INSERT INTO log (DATE_TIME,DESCRIPTION) VALUES ('${useNow()}','${logText}');
   `, (err, result) => {
     err && console.log('log 저장에 실패하였습니다.');
-  })
-  // fs.appendFile('./log.txt', saveText, err => {
-  //   err && console.log('log 저장에 실패하였습니다.');
-  //   error && console.log(error);
-  // });
+    error && console.log(error);
+  });
 }
 
 // API 에러 코드 함수
 function apiError (code) {
   let find = apiErrorCodeList.find(x => Number(x.id) === Number(code));
   log(
-    ':: ' + useNow() + ' -> 공공데이터 포털 API 에러\n(에러코드: ' + code + ', 메시지: ' + find.msg + ', 설명: ' + find.desc + ')',
+    '공공데이터 포털 API 에러 (에러코드: ' + code + ', 메시지: ' + find.msg + ', 설명: ' + find.desc + ')',
     { code, msg: find.msg, description: find.desc }
   );
 }

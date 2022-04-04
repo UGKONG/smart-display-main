@@ -26,15 +26,28 @@ li {
   margin-bottom: 6px; 
   font-size: 24px; 
 }
+ul.api > li {
+  text-align: center;
+}
 span { 
   display: inline-block; 
-  width: 60px; 
+  width: 60px;
+  white-space: nowrap;
 }
 span.type { 
-  width: 120px; 
+  width: 120px;
 }
 span.dot { 
   width: 10px; 
   height: 10px; 
   border-radius: 100%; 
+}
+span.category {
+  width: unset;
+  font-size: 20px;
+  margin-right: 20px;
+}
+span.dateTime {
+  font-size: 20px;
+  width: unset;
 }
