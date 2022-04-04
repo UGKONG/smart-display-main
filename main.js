@@ -17,7 +17,7 @@ const {
 
 // 현재 날씨 상태 날짜 & 시간 셋팅
 function getNowWeatherTimeSet () {
-  let dateTime = useNow({ hour: 0, format: false });
+  let dateTime = useNow({ hour: -1, format: false });
   let [date, time] = dateTime.split(' ');
   time = time.slice(0, 2);
   time = time + '00';
@@ -194,7 +194,7 @@ function timeProcess () {
     let minutes = new Date().getMinutes();
     if (minutes != config_api.getMinutes) return;
     timeProcessCount++;
-    log('Time Process가 실행되었습니다.. (' + timeProcessCount + ')');
+    log('Time Process.. (' + timeProcessCount + ')');
     getFunctions();
   }, 60000);
 }
@@ -216,7 +216,7 @@ function dbConnect (err) {
 // log.txt에 log 저장
 function log (logText = '', error) {
   db.query(`
-    INSERT INTO log (DATE_TIME,DESCRIPTION) VALUES ('${useNow()}','${logText}');
+    INSERT INTO log (DESCRIPTION) VALUES ('${logText}, ${ip.address()}');
   `, (err, result) => {
     err && console.log('log 저장에 실패하였습니다.');
     error && console.log(error);
