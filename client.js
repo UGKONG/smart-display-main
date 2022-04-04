@@ -21,10 +21,11 @@ const indexHTML = ({
       <link rel='stylesheet' href='index.css' />
     </head>
     <body>
+      <a class='log' href='/log'>로그보기</a>
       <img src='logo.png' /><h1>Access IP: ${ipAddress}</h1><h1 style='margin-bottom: 0;'>Connect State</h1>
       <ul>
-        <li><span class='type'>Server</span><span class='dot' style='background-color: #33db33'></span></li>
-        <li><span class='type'>MySQL</span><span class='dot' style='${dbstateStyle}'></span></li>
+        <li><span class='type'>서버</span><span class='dot' style='background-color: #33db33'></span></li>
+        <li><span class='type'>데이터베이스</span><span class='dot' style='${dbstateStyle}'></span></li>
       </ul>
       <h1 style='margin-bottom: 0;'>Last API Request</h1>
       <ul class='api'>
@@ -77,9 +78,29 @@ function logView (req, res) {
       <style>
         * { margin: 0; padding: 0; }
         body { background-color: #333; color: #fff; }
+        .back {
+          position: fixed;
+          right: 10px;
+          top: 10px;
+          color: #fff;
+          text-decoration: none;
+          padding: 6px 10px;
+          border-radius: 3px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+        }
+        .back:hover {
+          background-color: #aaaaaa20;
+        }
+        .back:active {
+          background-color: #aaaaaa40;
+        }
       </style>
       <p style='padding: 10px 10px 0px;font-weight: 700;'>최신순 정렬</p>
       <ul style='padding: 10px 20px;'>${tag}</ul>
+      <a class='back' href='/'>뒤로가기</a>
     `);
   });
 }
