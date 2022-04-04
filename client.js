@@ -1,6 +1,7 @@
 // 클라이언트
 const requestIp = require('request-ip');
 const { db } = require('./web');
+const { useDateFormat } = require('./main');
 
 module.exports = { dbIsConnect, pageNotFound, logView };
 
@@ -43,7 +44,7 @@ const indexHTML = ({
 // DB 연결상태 확인
 function dbIsConnect (req, res) {
   db.query(`
-    SELECT DATE,TIME FROM now_weather ORDER BY ID DESC LIMIT 1;
+    SELECT DATE,TIME,UPDATE_DT FROM now_weather ORDER BY ID DESC LIMIT 1;
   `, (err, result) => {
     let data = result[0];
     let Y = data?.DATE?.slice(0, 4);
@@ -51,11 +52,12 @@ function dbIsConnect (req, res) {
     let D = data?.DATE?.slice(6, 8);
     let h = data?.TIME?.slice(0, 2);
     let m = data?.TIME?.slice(2, 4);
-
+    let updateDT = useDateFormat(data?.UPDATE_DT);
+    
     let HTML = indexHTML({
       ipAddress: requestIp.getClientIp(req),
       result: err ? false : true,
-      nowWeatherDate: err ? '-' : Y + '-' + M + '-' + D + ' ' + h + ':' + m,
+      nowWeatherDate: err ? '-' : Y + '-' + M + '-' + D + ' ' + h + ':' + m + ' (업데이트: ' + updateDT + ')',
       shortWeatherDate: '-',
       longWeatherDate: '-',
       nowDustDate: '-',

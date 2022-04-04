@@ -1,4 +1,4 @@
-module.exports = { useNow, serverStart, dbConnect }
+module.exports = { useNow, serverStart, dbConnect, useDateFormat }
 
 let timeProcessCount = 0;
 let requestCount = 0;
@@ -256,6 +256,20 @@ function useNow (option = { hour: 0, format: true }) {
   let s = String(date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
 
   if (!format) return Y + M + D + ' ' + h + m + s;
+  let result = Y + '-' + M + '-' + D + ' ' + h + ':' + m + ':' + s;
+  return result;
+}
+
+// 날짜 & 시간 Format
+function useDateFormat (date) {
+  if (!date) return null;
+  let Y = String(date.getFullYear());
+  let M = String((date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1));
+  let D = String(date.getDate() < 10 ? '0' + date.getDate() : date.getDate());
+  let h = String(date.getHours() < 10 ? '0' + date.getHours() : date.getHours());
+  let m = String(date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
+  let s = String(date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
+
   let result = Y + '-' + M + '-' + D + ' ' + h + ':' + m + ':' + s;
   return result;
 }
