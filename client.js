@@ -30,11 +30,11 @@ const indexHTML = ({
       </ul>
       <h1 style='margin-bottom: 0;'>Last API Request</h1>
       <ul class='api'>
-        <li><span class='category'>초단기실황</span><span class='dateTime'>${nowWeatherDate}</span></li>
-        <li><span class='category'>단기예보</span><span class='dateTime'>${shortWeatherDate}</span></li>
-        <li><span class='category'>중기예보</span><span class='dateTime'>${longWeatherDate}</span></li>
+        <li><span class='category'>실시간 날씨</span><span class='dateTime'>${nowWeatherDate}</span></li>
+        <li><span class='category'>단기 날씨 예보</span><span class='dateTime'>${shortWeatherDate}</span></li>
+        <li><span class='category'>중기 날씨 예보</span><span class='dateTime'>${longWeatherDate}</span></li>
         <li><span class='category'>실시간 미세먼지</span><span class='dateTime'>${nowDustDate}</span></li>
-        <li><span class='category'>미세먼지 주간예보</span><span class='dateTime'>${shortDustDate}</span></li>
+        <li><span class='category'>단기 미세먼지 예보</span><span class='dateTime'>${shortDustDate}</span></li>
       </ul>
     </body>
   `;
