@@ -230,12 +230,16 @@ function dbConnect (err) {
 
 // log.txt에 log 저장
 function log (logText = '', error) {
-  let saveText = ':: ' + useNow() + ' -> ' + logText + '\n';
-
-  fs.appendFile('./log.txt', saveText, err => {
+  // let saveText = ':: ' + useNow() + ' -> ' + logText + '\n';
+  db.query(`
+    INSERT INTO log (DATE_TIME,DESCRIPTION) VALUES ('${useNow()}','${logText + '\n'}');
+  `, (err, result) => {
     err && console.log('log 저장에 실패하였습니다.');
-    error && console.log(error);
-  });
+  })
+  // fs.appendFile('./log.txt', saveText, err => {
+  //   err && console.log('log 저장에 실패하였습니다.');
+  //   error && console.log(error);
+  // });
 }
 
 // API 에러 코드 함수
