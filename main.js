@@ -215,7 +215,7 @@ function serverStart () {
     ':: ' + useNow() + ' -> Nodejs 서버 연결 성공',
     ':: ' + useNow() + ' -> Nodejs 서버 연결 성공'
   );
-  // timeProcess();
+  timeProcess();
 }
 
 // Database 연결 함수
@@ -233,7 +233,7 @@ function log (logText = '', error) {
   let saveText = ':: ' + useNow() + ' -> ' + logText + '\n';
 
   fs.appendFile('./log.txt', saveText, err => {
-    err && console.log('log 저장에 실패하였습니다.', err);
+    err && console.log('log 저장에 실패하였습니다.');
     error && console.log(error);
   });
 }
