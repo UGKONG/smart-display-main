@@ -268,7 +268,6 @@ function serverStart () {
 
 // Database 연결 함수
 function dbConnect (err) {
-  if (err) return console.log(err);
   if (err) return log('데이터베이스 연결에 실패하였습니다.', '데이터베이스 연결에 실패하였습니다.');
   log('데이터베이스 연결 성공');
   console.log(useNow() + ' : 서버 & DB 연결');

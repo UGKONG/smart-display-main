@@ -13,9 +13,6 @@ module.exports = { db, app };
 
 // 엔진 셋팅
 app.use(express.static(__dirname + '/public'));
-app.set('port', 8001);
-app.use('/test', express.static(__dirname + '../view'));
-app.use(express.static(__dirname + '/public'));
 
 // 실행
 const { serverStart, dbConnect } = require('./main');
