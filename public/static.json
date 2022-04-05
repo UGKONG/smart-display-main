@@ -40,6 +40,12 @@
   "nowWeatherCategoryList": [
     "PTY","REH","RN1","T1H","UUU","VEC","VVV","WSD"
   ],
+  "shortWeatherCategoryList": [
+    "TMP","UUU","VVV","VEC","WSD","SKY","PTY","POP","WAV","PCP","REH","SNO","TMN","TMX"
+  ],
+  "shortWeatherGetTimeList": [
+    "0200","0500","0800","1100","1400","1700","2000","2300"
+  ],
   "nowDustCategoryList": [
     "so2Grade","coFlag","khaiValue","so2Value","coValue",
     "pm10Flag","o3Grade","pm10Value","khaiGrade","no2Flag",

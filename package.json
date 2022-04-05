@@ -4,7 +4,8 @@
   "description": "",
   "main": "./web.js",
   "scripts": {
-    "dev": "nodemon ./web.js",
+    "dev:mac": "open 'http://localhost:8001' && nodemon ./web.js",
+    "dev:window": "start chrom 'http://localhost:8001' && nodemon ./web.js",
     "start": "node ./web.js"
   },
   "keywords": [],
@@ -13,8 +14,11 @@
   "dependencies": {
     "express": "^4.17.3",
     "ip": "^1.1.5",
+    "lodash": "^4.17.21",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.15",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "request-ip": "^2.1.3",
+    "socket.io": "^4.4.1"
   }
 }

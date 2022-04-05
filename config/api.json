@@ -1,5 +1,6 @@
 {
-  "getMinutes": 45,
+  "nowWeatherGetMinutes": 45,
+  "shortWeatherGetMinutes": 55,
   "nowWeatherKey": "lqCjGenskwPau%2BJGqJizumiOzTulDPSx%2FZqfip%2FjdfLLk6PoYWysZ1pe674TuaBGKSA%2BHN%2Fv7KTyWtaWi5cITA%3D%3D",
   "nowDustKey": "lqCjGenskwPau%2BJGqJizumiOzTulDPSx%2FZqfip%2FjdfLLk6PoYWysZ1pe674TuaBGKSA%2BHN%2Fv7KTyWtaWi5cITA%3D%3D"
 }

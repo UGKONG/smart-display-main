@@ -1,0 +1,71 @@
+* {
+  list-style: none; 
+  padding: 0;
+}
+html, body { 
+  width: 100%; 
+  height: 100%; 
+}
+body { 
+  color: #fff; 
+  background-color: #333; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  flex-flow: column; 
+  margin: 0;
+}
+img { 
+  width: 300px; 
+  margin-bottom: 40px;
+} 
+h1 { 
+  font-size: 28px;
+  letter-spacing: 2px;
+}
+li { 
+  margin-bottom: 10px; 
+  font-size: 18px; 
+}
+ul.api > li {
+  text-align: center;
+}
+span { 
+  display: inline-block; 
+  width: 60px;
+  white-space: nowrap;
+}
+span.type { 
+  width: 140px;
+}
+span.dot { 
+  width: 10px; 
+  height: 10px; 
+  border-radius: 100%; 
+}
+span.category {
+  width: unset;
+  margin-right: 20px;
+}
+span.dateTime {
+  width: unset;
+}
+a.log {
+  position: fixed;
+  right: 10px;
+  top: 10px;
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+a.log:hover {
+  background-color: #aaaaaa20;
+}
+a.log:active {
+  background-color: #aaaaaa40;
+}
