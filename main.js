@@ -115,8 +115,8 @@ function getShortWeatherTimeSet (lastDataRequest) {
     [date, time] = dateTime.split(' ');
     time = time.slice(0, 2) + '00';
   } else {  // 현재 시간이 요청 시간이 아닐때
-    let date = new Date();
-    date.setHours(0);date.setMinutes(0);date.setSeconds(0);
+    let _date = new Date();
+    _date.setHours(0);_date.setMinutes(0);_date.setSeconds(0);
     
     let getTimeList = [...shortWeatherGetTimeList];
     getTimeList.push(time);
@@ -125,11 +125,11 @@ function getShortWeatherTimeSet (lastDataRequest) {
 
     if (getTimeIdx === 0) {
       time = getTimeList[getTimeList.length - 1];
-      date.setHours(date.getHours() - 1);
+      _date.setHours(_date.getHours() - 1);
     } else {
       time = getTimeList[getTimeIdx - 1];
     }
-    date = useDateFormat(date).split(' ')[0].replaceAll('-', '');
+    date = useDateFormat(_date).split(' ')[0].replaceAll('-', '');
   }
   
 
