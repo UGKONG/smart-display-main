@@ -4,8 +4,11 @@
   "description": "",
   "main": "./web.js",
   "scripts": {
+<<<<<<< HEAD
     "dev:mac": "open 'http://localhost:8001' && nodemon ./web.js",
     "dev:window": "start chrom 'http://localhost:8001' && nodemon ./web.js",
+=======
+>>>>>>> 9c216677dd983682f452bc6d212fb5d9e8df3330
     "start": "node ./web.js"
   },
   "keywords": [],

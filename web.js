@@ -12,7 +12,12 @@ const port = 8001;
 module.exports = { db, app };
 
 // 엔진 셋팅
+<<<<<<< HEAD
 app.use(express.static(__dirname + '/public'));
+=======
+app.set('port', 8001);
+app.use('/test', express.static(__dirname + '../view'));
+>>>>>>> 9c216677dd983682f452bc6d212fb5d9e8df3330
 
 // 실행
 const { serverStart, dbConnect } = require('./main');
