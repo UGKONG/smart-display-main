@@ -185,7 +185,6 @@ function getShortWeather ({ time, date, loc }) {
 
 // 단기 날씨 정보 가공
 function newShortWeather ({ data, loc, time, date }) {
-  // return console.log(data.filter(x => x.fcstTime === '1500').length);
   let resultArr = [];
   let dateArray = useCleanArray(data, 'fcstDate').map(item => item.fcstDate);
   let timeArray = useCleanArray(data, 'fcstTime').map(item => item.fcstTime);
@@ -269,7 +268,8 @@ function serverStart () {
 
 // Database 연결 함수
 function dbConnect (err) {
-  if (err) return log('데이터베이스 연결에 실패하였습니다.');
+  if (err) return console.log(err);
+  if (err) return log('데이터베이스 연결에 실패하였습니다.', '데이터베이스 연결에 실패하였습니다.');
   log('데이터베이스 연결 성공');
   console.log(useNow() + ' : 서버 & DB 연결');
 }
