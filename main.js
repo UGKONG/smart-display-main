@@ -8,11 +8,7 @@ const requestIp = require('request-ip');
 const fs = require('fs');
 const request = require('request');
 const config_api = require('./config/api.json');
-<<<<<<< HEAD
-const { db, io, app } = require('./web');
-=======
-const { db } = require('./web');
->>>>>>> 9c216677dd983682f452bc6d212fb5d9e8df3330
+const { db, app } = require('./web');
 const {
   apiErrorCodeList,
   sidoNameList,

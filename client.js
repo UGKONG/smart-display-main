@@ -35,6 +35,8 @@ const indexHTML = (info = {}) => {
 
 // DB 연결상태 확인
 function dbIsConnect (req, res) {
+  let getInfo = {};
+  
   const oneLineDateFormat = (result) => {
     let data = result[0];
     let Y = data?.DATE?.slice(0, 4);
@@ -45,7 +47,6 @@ function dbIsConnect (req, res) {
     let updateDT = useDateFormat(data?.UPDATE_DT);
     return Y + '-' + M + '-' + D + ' ' + h + ':' + m + ' (업데이트: ' + updateDT + ')';
   }
-  let getInfo = {};
 
   db.query(`
     SELECT DATE,TIME,UPDATE_DT FROM now_weather ORDER BY ID DESC LIMIT 1;
