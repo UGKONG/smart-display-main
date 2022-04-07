@@ -33,6 +33,7 @@ export default function () {
 
   return (
     <Container>
+      <title>스마트 가로등</title>
       <AccessIP>Access IP: {ip}</AccessIP>
 
       <Article>

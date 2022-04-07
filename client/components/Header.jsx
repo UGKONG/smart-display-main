@@ -1,28 +1,24 @@
 import React from 'react';
 import Styled from 'styled-components';
 import logo from '../logo.png';
+import { NavLink } from 'react-router-dom';
 
-export default function ({ activePage, setActivePage }) {
+export default function () {
   const menuList = React.useRef([
-    { id: 0, name: 'HOME' },
-    { id: 1, name: 'DEVICE' },
-    { id: 2, name: 'LOG' },
+    { id: 0, name: 'HOME', to: '/' },
+    { id: 1, name: 'DEVICE', to: '/device' },
+    { id: 2, name: 'LOG', to: '/log' },
   ]);
-  const clickMenu = id => setActivePage(id);
 
   return (
     <Header>
       <Logo src={logo} alt="logo" />
       <BtnContainer>
-        {
-          menuList.current.map(item => (
-            <button 
-              className={activePage === item.id ? 'active': ''}
-              onClick={() => clickMenu(item.id)}
-              key={item.id}
-            >{item.name}</button>
-          ))
-        }
+        {menuList.current.map(item => (
+          <NavLink to={item.to} key={item.id} active-class-name={'active'}>
+            {item.name}
+          </NavLink>
+        ))}
       </BtnContainer>
     </Header>
   )
@@ -35,9 +31,19 @@ const Header = Styled.header`
   align-items: center;
   justify-content: space-between;
   padding: 5px 10px;
+  
+  @media screen and (max-width: 500px) {
+    height: 100px;
+    flex-direction: column;
+  }
 `;
 const Logo = Styled.img`
-  height: 70%;
+  height: 35px;
+
+  @media screen and (max-width: 500px) {
+    height: 31px;
+    margin: 10px 0;
+  }
 `;
 const BtnContainer = Styled.div`
   height: 100%;
@@ -45,7 +51,7 @@ const BtnContainer = Styled.div`
   display: flex;
   align-items: center;
 
-  & > button {
+  & > a {
     padding: 8px 14px;
     background-color: transparent;
     border: none;

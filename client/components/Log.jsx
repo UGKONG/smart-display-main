@@ -18,6 +18,7 @@ export default function () {
 
   return (
     <Log>
+      <title>스마트 가로등 :: 로그</title>
       {
         list.map(item => (
           <List key={item.id}>
@@ -31,9 +32,7 @@ export default function () {
   )
 }
 
-const Log = Styled.ul`
-  padding: 10px;
-`;
+const Log = Styled.ul``;
 const List = Styled.li`
   margin-bottom: 10px; 
   font-size: 14px; 
