@@ -47,9 +47,9 @@
     "0200","0500","0800","1100","1400","1700","2000","2300"
   ],
   "nowDustCategoryList": [
-    "so2Grade","coFlag","khaiValue","so2Value","coValue",
-    "pm10Flag","o3Grade","pm10Value","khaiGrade","no2Flag",
-    "no2Grade","o3Flag","so2Flag","coGrade","no2Value",
-    "pm10Grade","o3Value"
+    "so2Grade", "coFlag", "khaiValue", "so2Value", "coValue", 
+    "pm25Flag", "pm10Flag", "pm10Value", "o3Grade", "khaiGrade", 
+    "pm25Value", "no2Flag", "no2Grade", "o3Flag", "pm25Grade", 
+    "so2Flag", "coGrade", "no2Value", "pm10Grade", "o3Value"
   ]
 }
