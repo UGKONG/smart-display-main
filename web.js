@@ -7,7 +7,6 @@ const app = express();
 const mysql = require('mysql');
 const db_config = require('./server/json/db.json');
 const db = mysql.createConnection(db_config);
-const port = 8001;
 
 // 서버엔진, 데이터베이스 내보내기
 module.exports = { db, app };
@@ -21,7 +20,7 @@ app.use(express.static(__dirname + '/../client/build'));
 // 실행
 const { serverStart, dbConnect } = require('./server/main');
 db.connect(dbConnect);
-app.listen(port, '0.0.0.0', serverStart);
+app.listen(8001, '0.0.0.0', serverStart);
 
 const {
   isConnect, 
