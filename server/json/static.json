@@ -1,0 +1,55 @@
+{
+  "apiErrorCodeList": [
+    { "id": "00", "msg":	"NORMAL_SERVICE",	"desc": "정상" },
+    { "id": "01", "msg":	"APPLICATION_ERROR",	"desc": "어플리케이션 에러" },
+    { "id": "02", "msg":	"DB_ERROR",	"desc": "데이터베이스 에러" },
+    { "id": "03", "msg":	"NODATA_ERROR",	"desc": "데이터없음 에러" },
+    { "id": "04", "msg":	"HTTP_ERROR",	"desc": "HTTP 에러" },
+    { "id": "05", "msg":	"SERVICETIME_OUT",	"desc": "서비스 연결실패 에러" },
+    { "id": "10", "msg":	"INVALID_REQUEST_PARAMETER_ERROR",	"desc": "잘못된 요청 파라메터 에러" },
+    { "id": "11", "msg":	"NO_MANDATORY_REQUEST_PARAMETERS_ERROR",	"desc": "필수요청 파라메터가 없음" },
+    { "id": "12", "msg":	"NO_OPENAPI_SERVICE_ERROR",	"desc": "해당 오픈API서비스가 없거나 폐기됨" },
+    { "id": "20", "msg":	"SERVICE_ACCESS_DENIED_ERROR",	"desc": "서비스 접근거부" },
+    { "id": "21", "msg":	"TEMPORARILY_DISABLE_THE_SERVICEKEY_ERROR",	"desc": "일시적으로 사용할 수 없는 서비스 키" },
+    { "id": "22", "msg":	"LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",	"desc": "서비스 요청제한횟수 초과에러" },
+    { "id": "30", "msg":	"SERVICE_KEY_IS_NOT_REGISTERED_ERROR",	"desc": "등록되지 않은 서비스키" },
+    { "id": "31", "msg":	"DEADLINE_HAS_EXPIRED_ERROR",	"desc": "기한만료된 서비스키" },
+    { "id": "32", "msg":	"UNREGISTERED_IP_ERROR",	"desc": "등록되지 않은 IP" },
+    { "id": "33", "msg":	"UNSIGNED_CALL_ERROR",	"desc": "서명되지 않은 호출" },
+    { "id": "99", "msg":	"UNKNOWN_ERROR",	"desc": "기타에러" }
+  ],
+  "sidoNameList": [
+    { "long": "서울특별시", "short": "서울" },
+    { "long": "부산광역시", "short": "부산" },
+    { "long": "인천광역시", "short": "인천" },
+    { "long": "대구광역시", "short": "대구" },
+    { "long": "울산광역시", "short": "울산" },
+    { "long": "대전광역시", "short": "대전" },
+    { "long": "광주광역시", "short": "광주" },
+    { "long": "세종특별자치시", "short": "세종" },
+    { "long": "제주특별자치도", "short": "제주" },
+    { "long": "강원도", "short": "강원" },
+    { "long": "경기도", "short": "경기" },
+    { "long": "경상북도", "short": "경북" },
+    { "long": "경상남도", "short": "경남" },
+    { "long": "충청북도", "short": "충북" },
+    { "long": "충청남도", "short": "충남" },
+    { "long": "전라북도", "short": "전북" },
+    { "long": "전라남도", "short": "전남" }
+  ],
+  "nowWeatherCategoryList": [
+    "PTY","REH","RN1","T1H","UUU","VEC","VVV","WSD"
+  ],
+  "shortWeatherCategoryList": [
+    "TMP","UUU","VVV","VEC","WSD","SKY","PTY","POP","WAV","PCP","REH","SNO","TMN","TMX"
+  ],
+  "shortWeatherGetTimeList": [
+    "0200","0500","0800","1100","1400","1700","2000","2300"
+  ],
+  "nowDustCategoryList": [
+    "so2Grade", "coFlag", "khaiValue", "so2Value", "coValue", 
+    "pm25Flag", "pm10Flag", "pm10Value", "o3Grade", "khaiGrade", 
+    "pm25Value", "no2Flag", "no2Grade", "o3Flag", "pm25Grade", 
+    "so2Flag", "coGrade", "no2Value", "pm10Grade", "o3Value"
+  ]
+}

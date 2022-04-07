@@ -1,0 +1,47 @@
+{
+  "name": "smartstreetlight",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./web.js",
+  "scripts": {
+    "dev:mac": "open 'http://localhost:8001' && nodemon ./web.js",
+    "dev:window": "start chrom 'http://localhost:8001' && nodemon ./web.js",
+    "dev:client": "webpack-dev-server --mode development --port 8002 --hot --open",
+    "build:client": "webpack --mode production",
+    "start": "node ./web.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/preset-env": "^7.16.11",
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "ip": "^1.1.5",
+    "lodash": "^4.17.21",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.15",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "request": "^2.88.2",
+    "request-ip": "^2.1.3",
+    "style-components": "^0.1.0",
+    "styled-components": "^5.3.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.8",
+    "@babel/preset-react": "^7.16.7",
+    "babel-loader": "^8.2.4",
+    "css-loader": "^6.7.1",
+    "file-loader": "^6.2.0",
+    "html-loader": "^3.1.0",
+    "html-webpack-plugin": "^5.5.0",
+    "sass": "^1.49.11",
+    "sass-loader": "^12.6.0",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.8.1"
+  }
+}
