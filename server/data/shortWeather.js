@@ -49,7 +49,7 @@ module.exports.shortWeather = {
   getShortWeather ({ time, date, loc }) {
 
     let query = useQueryString({
-      ServiceKey: config_api.nowWeatherKey,
+      ServiceKey: config_api.apiKey,
       pageNo: 1,
       numOfRows: 10000,
       dataType: 'JSON',

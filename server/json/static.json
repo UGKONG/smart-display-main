@@ -46,6 +46,9 @@
   "shortWeatherGetTimeList": [
     "0200","0500","0800","1100","1400","1700","2000","2300"
   ],
+  "shortDustGetTimeList": [
+    "0500","1100","1700","2300"
+  ],
   "nowDustCategoryList": [
     "so2Grade", "coFlag", "khaiValue", "so2Value", "coValue", 
     "pm25Flag", "pm10Flag", "pm10Value", "o3Grade", "khaiGrade", 

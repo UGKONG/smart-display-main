@@ -3,6 +3,8 @@ const config_api = require('./json/api.json');
 const { nowWeather } = require('./data/nowWeather');
 const { shortWeather } = require('./data/shortWeather');
 const { nowDust } = require('./data/nowDust');
+const { weatherText } = require('./data/weatherText');
+const { shortDust } = require('./data/shortDust');
 
 // 일정 시간마다 실행할 함수들
 function getFunctions (minutes, isAuto) {
@@ -10,10 +12,14 @@ function getFunctions (minutes, isAuto) {
     (minutes == config_api.nowWeatherGetMinutes) && nowWeather.getNowWeatherSet(minutes < config_api.nowWeatherGetMinutes);
     (minutes == config_api.shortWeatherGetMinutes) && shortWeather.getShortWeatherSet(minutes < config_api.shortWeatherGetMinutes);
     (minutes == config_api.nowDustGetMinutes) && nowDust.getNowDustSet();
+    (minutes == config_api.weatherTextGetMinutes) && weatherText.getWeatherText();
+    (minutes == config_api.shortDustGetMinutes) && shortDust.getShortDustSet(minutes < config_api.shortDustGetMinutes);
   } else {
     nowWeather.getNowWeatherSet(minutes < config_api.nowWeatherGetMinutes);
     shortWeather.getShortWeatherSet(minutes < config_api.shortWeatherGetMinutes);
     nowDust.getNowDustSet();
+    weatherText.getWeatherText();
+    shortDust.getShortDustSet(minutes < config_api.shortDustGetMinutes);
   }
 }
 

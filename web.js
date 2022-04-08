@@ -20,6 +20,7 @@ const { serverStart, dbConnect } = require('./server/main');
 db.connect(dbConnect);
 app.listen(8001, '0.0.0.0', serverStart);
 
+// API에 사용되는 함수 가져오기
 const {
   isConnect, 
   getDevice,

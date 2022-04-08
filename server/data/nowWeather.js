@@ -23,7 +23,7 @@ module.exports.nowWeather = {
   getNowWeather ({ date, time, loc }) {
 
     let query = useQueryString({
-      ServiceKey: config_api.nowWeatherKey,
+      ServiceKey: config_api.apiKey,
       pageNo: 1,
       numOfRows: 1000,
       dataType: 'JSON',

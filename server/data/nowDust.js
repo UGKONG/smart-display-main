@@ -5,7 +5,6 @@ const { nowDustCategoryList } = require('../json/static.json');
 
 module.exports.nowDust = {
   getNowDustSet () {
-    
     db.query(`
       SELECT DISTINCT b.STATION_NAME
       FROM hardware_list a LEFT JOIN station_list b
@@ -19,7 +18,7 @@ module.exports.nowDust = {
   getNowDust ({ loc }) {
 
     let query = useQueryString({
-      ServiceKey: config_api.nowWeatherKey,
+      ServiceKey: config_api.apiKey,
       pageNo: 1,
       numOfRows: 10000,
       returnType: 'json',
