@@ -1,6 +1,6 @@
 const request = require('request');
 const config_api = require('../json/api.json');
-const { useNow, useQueryString, useDateFormat, log, useCleanArray } = require('../hook');
+const { useNow, useQueryString, useDateFormat, log, apiError, useCleanArray } = require('../hook');
 const { shortWeatherCategoryList, shortWeatherGetTimeList } = require('../json/static.json');
 
 module.exports.shortWeather = {

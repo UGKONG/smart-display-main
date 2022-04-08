@@ -22,11 +22,23 @@ app.listen(8001, '0.0.0.0', serverStart);
 
 const {
   isConnect, 
+  getDevice,
+  addDevice,
+  modifyDevice,
+  delDevice,
+  getLocation,
+  getStation,
   pageNotFound, 
-  log 
+  getLog 
 } = require('./server/api');
 
 // API
 app.get('/api/isConnect', isConnect);
-app.get('/api/log', log);
+app.get('/api/getDevice', getDevice);
+app.post('/api/addDevice', addDevice);
+app.put('/api/modifyDevice/:id', modifyDevice);
+app.delete('/api/delDevice/:id', delDevice);
+app.get('/api/getLocation/:path', getLocation);
+app.get('/api/getStation/:path', getStation);
+app.get('/api/log', getLog);
 app.get('*', pageNotFound);

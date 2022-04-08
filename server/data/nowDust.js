@@ -1,6 +1,6 @@
 const request = require('request');
 const config_api = require('../json/api.json');
-const { useQueryString, log } = require('../hook');
+const { useQueryString, log, apiError } = require('../hook');
 const { nowDustCategoryList } = require('../json/static.json');
 
 module.exports.nowDust = {

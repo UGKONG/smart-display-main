@@ -79,6 +79,9 @@ const AccessIP = Styled.p`
 `;
 const Article = Styled.article`
   margin-bottom: 40px;
+  &:last-of-type {
+    margin-bottom: 0;
+  }
 `;
 const Title = Styled.h2`
   font-size: 30px;

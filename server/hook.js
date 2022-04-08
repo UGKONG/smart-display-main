@@ -74,7 +74,7 @@ module.exports.log = (logText = '', error) => {
 // API 에러 코드 함수
 module.exports.apiError = (code) => {
   let find = apiErrorCodeList.find(x => Number(x.id) === Number(code));
-  log(
+  this.log(
     '공공데이터 포털 API 에러 (에러코드: ' + code + ', 메시지: ' + find.msg + ', 설명: ' + find.desc + ')',
     { code, msg: find.msg, description: find.desc }
   );
