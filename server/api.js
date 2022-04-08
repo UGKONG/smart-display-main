@@ -175,7 +175,7 @@ module.exports.getLog = (req, res) => {
     result.forEach(item => {
       returnData.push({
         id: item.ID,
-        dateTime: useDateFormat(item.DATE_TIME),
+        dateTime: useDateFormat(new Date(item.DATE_TIME)),
         ip: item.IP,
         desc: item.DESCRIPTION
       });
