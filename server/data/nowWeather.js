@@ -49,7 +49,7 @@ module.exports.nowWeather = {
     request(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst?${query}`,
       (err, result) => {
         if (err) return log('초단기실황 데이터 요청에 실패하였습니다. (날짜: ' + date + ', 시간: ' + time + ')', err);
-        log('초단기실황 데이터 요청에 성공하였습니다. (날짜: ' + date + ', 시간: ' + time + ')');
+        // log('초단기실황 데이터 요청에 성공하였습니다. (날짜: ' + date + ', 시간: ' + time + ')');
         
         if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
 

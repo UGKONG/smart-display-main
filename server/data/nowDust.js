@@ -42,8 +42,8 @@ module.exports.nowDust = {
 
     request(`http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?${query}`,
       (err, result) => {
-        if (err) return log('단기예보조회 데이터 요청에 실패하였습니다. (측정소: ' + loc + ')', err);
-        log('단기예보조회 데이터 요청에 성공하였습니다. (측정소: ' + loc + ')');
+        if (err) return log('현재 미세먼지 데이터 요청에 실패하였습니다. (측정소: ' + loc.STATION_NAME + ')', err);
+        // log('현재 미세먼지 데이터 요청에 성공하였습니다. (측정소: ' + loc.STATION_NAME + ')');
         
         if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
 

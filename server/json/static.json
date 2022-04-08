@@ -49,6 +49,9 @@
   "shortDustGetTimeList": [
     "0500","1100","1700","2300"
   ],
+  "shortDetailDustGetTimeList": [
+    "1730"
+  ],
   "nowDustCategoryList": [
     "so2Grade", "coFlag", "khaiValue", "so2Value", "coValue", 
     "pm25Flag", "pm10Flag", "pm10Value", "o3Grade", "khaiGrade", 

@@ -28,7 +28,7 @@ module.exports.weatherText = {
     request(`http://apis.data.go.kr/1360000/VilageFcstMsgService/getWthrSituation?${query}`,
       (err, result) => {
         if (err) return log('기상개황조회 데이터 요청에 실패하였습니다.', err);
-        log('기상개황조회 데이터 요청에 성공하였습니다.');
+        // log('기상개황조회 데이터 요청에 성공하였습니다.');
 
         if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
 
