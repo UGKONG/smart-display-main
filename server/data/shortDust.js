@@ -77,29 +77,31 @@ module.exports.shortDust = {
     let resultArr = [];
 
     data.forEach(item => {
+      let category = item.informCode;
       let dataDate = item.informData;
       let locDataArr = item.informGrade.split(',');
-      let baseDate = item.dataTime;
-      
+      let [baseDate, baseTime] = item.dataTime.split(' ');
+      baseTime = baseTime.slice(0, 2) + ':00';
       locDataArr.forEach(grade => {
         let [loc, val] = grade.split(' : ');
-        resultArr.push({ date: dataDate, location: loc, value: val, baseDate });
+        resultArr.push({ date: dataDate, category, location: loc, value: val, baseDate, baseTime });
       });
     });
     
     let insertSQL = [];
     
     resultArr.forEach(item => {
-      insertSQL.push(`('${item.date}','${item.location}','${item.value}','${item.baseDate}')`);
+      insertSQL.push(`('${item.date}','${item.location}','${item.value}','${item.baseDate}','${item.baseTime}','${item.category}')`);
     });
 
     db.query(`
       INSERT INTO short_dust
-      (DATE,LOCATION,VALUE,BASE_DT)
+      (DATE,LOCATION,VALUE,BASE_DT,BASE_TM,CATEGORY)
       VALUES
       ${insertSQL.join(',')}
       ON DUPLICATE KEY UPDATE
-      DATE=VALUES(DATE),LOCATION=VALUES(LOCATION),VALUE=VALUES(VALUE),BASE_DT=VALUES(BASE_DT)
+      DATE=VALUES(DATE),LOCATION=VALUES(LOCATION),VALUE=VALUES(VALUE),
+      BASE_DT=VALUES(BASE_DT),BASE_TM=VALUES(BASE_TM),CATEGORY=VALUES(CATEGORY)
     `, (err, result) => {
       if (err) return log('대기질 예보통보 조회 데이터 수정 요청을 실패하였습니다.', err);
       log(
