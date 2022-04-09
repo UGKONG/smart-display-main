@@ -168,20 +168,12 @@ module.exports.isConnect = (req, res) => {
 
 // log View 페이지
 module.exports.getLog = (req, res) => {
-  db.query('SELECT * FROM log ORDER BY ID DESC LIMIT 1000', (err, result) => {
+  db.query(`
+    SELECT
+    a.ID, a.IP, a.DESCRIPTION, DATE_FORMAT(a.DATE_TIME, '%Y-%m-%d %H:%i:%S') AS DATE_TIME
+    FROM log a ORDER BY ID DESC LIMIT 1000
+  `, (err, result) => {
     if (err) return log('log 리스트 조회에 실패하였습니다.', err);
-    
-    let returnData = [];
-    result.forEach(item => {
-      returnData.push({
-        id: item.ID,
-        dateTime: useDateFormat(new Date(item.DATE_TIME)),
-        ip: item.IP,
-        desc: item.DESCRIPTION
-      });
-    });
-    
-    res.send(returnData);
-    return;
+    res.send(result);
   });
 }

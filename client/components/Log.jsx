@@ -25,10 +25,10 @@ export default function () {
       <Log>
         {
           list.map(item => (
-            <List key={item.id}>
-              <Date>{item.dateTime}</Date>
-              <Ip>{item.ip}</Ip>
-              <Text>{item.desc}</Text>
+            <List key={item.ID}>
+              <Date>{item.DATE_TIME}</Date>
+              <Ip>{item.IP}</Ip>
+              <Text>{item.DESCRIPTION}</Text>
             </List>
           ))
         }
@@ -44,6 +44,12 @@ const Log = Styled.ul`
 const List = Styled.li`
   margin-bottom: 10px; 
   font-size: 14px;
+  background-color: #666;
+  border-radius: 8px;
+  padding: 10px;
 `;
-const Ip = Styled.p``;
+const Date = Styled.span`
+  margin-right: 10px;
+`;
+const Ip = Styled.span``;
 const Text = Styled.p``;
