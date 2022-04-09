@@ -8,7 +8,7 @@ const { log } = require('./hook');
 module.exports.getDevice = (req, res) => {
   db.query(`
     SELECT 
-    a.ID, a.NAME, a.CREATE_DATE, a.IP_ADDRESS, a.AGENT, a.DESCRIPTION, a.LOCATION_ID, a.STATION_ID,
+    a.ID, a.NAME, DATE_FORMAT(a.CREATE_DATE, '%Y-%m-%d %H:%i:%S') AS CREATE_DATE, a.IP_ADDRESS, a.AGENT, a.DESCRIPTION, a.LOCATION_ID, a.STATION_ID,
     b.PATH1, b.PATH2, b.PATH3,
     c.STATION_NAME
     FROM hardware_list AS a 
