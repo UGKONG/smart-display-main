@@ -158,9 +158,18 @@ module.exports.isConnect = (req, res) => {
         result[0].DATE = dateTime.split(' ')[0].replace(/-/g, '');
         result[0].TIME = dateTime.split(' ')[1].replace(/:/g, '');
         getInfo.infoList.push({ name: 'nowDust', value: err ? '-' : oneLineDateFormat(result) });
+        
+        db.query(`
+          SELECT DATE,UPDATE_DT FROM short_dust ORDER BY ID DESC LIMIT 1;
+        `, (err, result) => {
+          result[0].DATE = result[0].DATE.replace(/-/g, '');
+          let temp = oneLineDateFormat(result).split(' ');
+          getInfo.infoList.push({ name: 'shortDust', value: err ? '-' : temp[0] + ' ' + temp[2] + ' ' + temp[3] + ' ' + temp[4] });
+          
+          err && console.log(err);
+          res.send(getInfo);
+        });
 
-        err && console.log(err);
-        res.send(getInfo);
       });
     });
   });

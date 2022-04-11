@@ -3,7 +3,7 @@ const config_api = require('../json/api.json');
 const { useQueryString, log, apiError } = require('../hook');
 const { nowDustCategoryList } = require('../json/static.json');
 
-module.exports.nowDust = {
+module.exports = {
   getNowDustSet () {
     db.query(`
       SELECT DISTINCT b.STATION_NAME

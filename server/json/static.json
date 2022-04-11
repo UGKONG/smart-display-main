@@ -43,19 +43,28 @@
   "shortWeatherCategoryList": [
     "TMP","UUU","VVV","VEC","WSD","SKY","PTY","POP","WAV","PCP","REH","SNO","TMN","TMX"
   ],
+  "nowDustCategoryList": [
+    "so2Grade", "coFlag", "khaiValue", "so2Value", "coValue", 
+    "pm25Flag", "pm10Flag", "pm10Value", "o3Grade", "khaiGrade", 
+    "pm25Value", "no2Flag", "no2Grade", "o3Flag", "pm25Grade", 
+    "so2Flag", "coGrade", "no2Value", "pm10Grade", "o3Value"
+  ],
+  "shortDustCategoryList": [
+    "PM10","PM25"
+  ],
+  "longDustCategoryList": [
+    "frcstOne","frcstTwo","frcstThree","frcstFour"
+  ],
   "shortWeatherGetTimeList": [
     "0200","0500","0800","1100","1400","1700","2000","2300"
+  ],
+  "longWeatherGetTimeList": [
+    "0600","1800"
   ],
   "shortDustGetTimeList": [
     "0500","1100","1700","2300"
   ],
   "shortDetailDustGetTimeList": [
     "1730"
-  ],
-  "nowDustCategoryList": [
-    "so2Grade", "coFlag", "khaiValue", "so2Value", "coValue", 
-    "pm25Flag", "pm10Flag", "pm10Value", "o3Grade", "khaiGrade", 
-    "pm25Value", "no2Flag", "no2Grade", "o3Flag", "pm25Grade", 
-    "so2Flag", "coGrade", "no2Value", "pm10Grade", "o3Value"
   ]
 }

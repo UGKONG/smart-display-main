@@ -2,7 +2,7 @@ const request = require('request');
 const config_api = require('../json/api.json');
 const { useQueryString, log, apiError, useDateFormat } = require('../hook');
 
-module.exports.weatherText = {
+module.exports = {
   getWeatherText() {
     let query = useQueryString({
       ServiceKey: config_api.apiKey,

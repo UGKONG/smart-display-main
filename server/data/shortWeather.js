@@ -3,7 +3,7 @@ const config_api = require('../json/api.json');
 const { useNow, useQueryString, useDateFormat, log, apiError, useCleanArray } = require('../hook');
 const { shortWeatherCategoryList, shortWeatherGetTimeList } = require('../json/static.json');
 
-module.exports.shortWeather = {
+module.exports = {
   getShortWeatherSet (lastDataRequest) {
     let dateTime = useNow({ hour: 0, format: false });
     let [date, time] = dateTime.split(' ');
