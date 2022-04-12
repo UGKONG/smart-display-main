@@ -10,7 +10,7 @@ export default function () {
     { id: 'shortWeather', name: '단기 날씨 예보', value: '-' },
     { id: 'longWeather', name: '중기 날씨 예보', value: '-' },
     { id: 'nowDust', name: '실시간 미세먼지', value: '-' },
-    { id: 'shortDust', name: '단기 미세먼지 예보', value: '-' },
+    { id: 'shortDust', name: '단기 미세먼지/초미세먼지 예보', value: '-' },
     { id: 'longDetailDust', name: '주간 초미세먼지 예보', value: '-' },
   ]);
 
@@ -86,7 +86,7 @@ const Article = Styled.article`
   }
 `;
 const Title = Styled.h2`
-  font-size: 30px;
+  font-size: 26px;
   margin-bottom: 16px;
   text-align: center;
   letter-spacing: 1px;

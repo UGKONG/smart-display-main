@@ -18,14 +18,33 @@ module.exports = {
 
       let isGetMinutes = longWeatherGetTimeList.indexOf(time);
       if (isGetMinutes > -1) {  // 현재 시간이 요청 시간일때
-        dateTime = useNow({ hour: lastDataRequest ? -12 : 0, format: false });
-        [date] = dateTime.split(' ');
+        [date] = useNow({ hour: lastDataRequest ? -12 : 0, format: false }).split(' ');
+
       } else {  // 현재 시간이 요청 시간이 아닐때
-        [date] = useNow({ hour: -12, format: false });
+
+        let _date = new Date();
+        _date.setHours(0);_date.setMinutes(0);_date.setSeconds(0);
+        
+        let getTimeList = [...longWeatherGetTimeList];
+        getTimeList.push(time);
+        getTimeList = getTimeList.sort((x, y) => x - y);
+        let getTimeIdx = getTimeList.indexOf(time);
+
+        if (getTimeIdx === 0) {
+          time = getTimeList[getTimeList.length - 1];
+          _date.setHours(_date.getHours() - 1);
+        } else {
+          time = getTimeList[getTimeIdx - 1];
+        }
+
+        let dateFormat = useDateFormat(_date)?.split(' ')[0];
+        let [y, m, d] = dateFormat.split('-');
+
+        date = y + m + d;
       }
     
       result.forEach(item => this.getLongWeather({ areaCode: item.CODE, date, time }));
-    })
+    });
 
   },
   getLongWeather({ areaCode, date, time }) {
@@ -51,7 +70,7 @@ module.exports = {
       }
       return true;
     }
-    console.log('base:', date);
+    
     request(`http://apis.data.go.kr/1360000/MidFcstInfoService/getMidTa?${query}`,
       (err, result) => {
         if (err) return log('중기기온조회 데이터 요청에 실패하였습니다. (측정소: ' + areaCode + ')', err);
@@ -60,12 +79,12 @@ module.exports = {
         if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
         
         let data = JSON.parse(result?.body)?.response?.body?.items?.item[0];
-        this.newLongWeather({ date, data });
+        this.newLongWeather({ date, time, data, areaCode });
       }
     )
     
   },
-  newLongWeather({ date, data }) {
+  newLongWeather({ date, time, data, areaCode }) {
     let resultArr = [];
     let startDat = 3;
     let dayCount = parseInt(Object.keys(data).length / 6, 0);
@@ -82,6 +101,26 @@ module.exports = {
       resultArr.push(pushObj);
     }
 
-    console.log(resultArr);
+    let insertSQL = [];
+
+    resultArr.forEach(item => {
+      insertSQL.push(`('${areaCode}','${item.date}',${item.min},${item.max},'${time}','${date}')`);
+    });
+
+    db.query(`
+      INSERT INTO long_weather
+      (AREA_CODE,DATE,MIN,MAX,BASE_TM,BASE_DT)
+      VALUES
+      ${insertSQL.join(',')}
+      ON DUPLICATE KEY UPDATE
+      MIN=VALUES(MIN),MAX=VALUES(MAX),
+      BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT)
+    `, (err, result) => {
+      if (err) return log('중기예보 조회 데이터 수정 요청을 실패하였습니다.', err);
+      log(
+        '중기예보 조회: 새로운 데이터 조회',
+        '중기예보 조회: 새로운 데이터 조회'
+      );
+    })
   }
 }

@@ -11,6 +11,7 @@ export default function () {
   const [nameValue, setNameValue] = React.useState('');
   const [locationValue, setLocationValue] = React.useState('');
   const [stationValue, setStationValue] = React.useState('');
+  const [areaValue, setAreaValue] = React.useState('');
   const [agentValue, setAgentValue] = React.useState('');
   const [memoValue, setMemoValue] = React.useState('');
 
@@ -18,6 +19,7 @@ export default function () {
     setNameValue('');
     setLocationValue('');
     setStationValue('');
+    setAreaValue('');
     setAgentValue('');
     setMemoValue('');
   }
@@ -38,8 +40,9 @@ export default function () {
     if (!stationValue) return alert('측정소 ID를 적어주세요.');
     if (String(stationValue).search(/[a-z]/gi) > -1) return alert('측정소 ID를 숫자로 적어주세요.');
     if (String(stationValue).search(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/) > -1) return alert('측정소 ID를 숫자로 적어주세요.');
+    if (!areaValue) return alert('지역코드를 적어주세요.');
     if (!agentValue) return alert('담당센터 또는 담당자의 이름을 적어주세요.');
-    let query = (`${!id ? '/api/addDevice?' : '/api/modifyDevice/' + id + '?'}nameValue=${nameValue}&locationValue=${locationValue}&stationValue=${stationValue}&agentValue=${agentValue}&memoValue=${memoValue}`);
+    let query = (`${!id ? '/api/addDevice?' : '/api/modifyDevice/' + id + '?'}nameValue=${nameValue}&locationValue=${locationValue}&stationValue=${stationValue}&areaValue=${areaValue}&agentValue=${agentValue}&memoValue=${memoValue}`);
     axios[!id ? 'post' : 'put'](query).then(({ data }) => {
       if (!data) return alert('장비 ' + (isEdit === 0 ? '등록' : '수정') + ' 에 실패하였습니다.\n관리자에게 문의해주세요.');
       valueReset();
@@ -68,6 +71,7 @@ export default function () {
       setNameValue(find.NAME);
       setLocationValue(find.LOCATION_ID);
       setStationValue(find.STATION_ID);
+      setAreaValue(find.AREA_CODE);
       setAgentValue(find.AGENT);
       setMemoValue(find.DESCRIPTION);
     }
@@ -98,6 +102,7 @@ export default function () {
               <p>장비명: {item.NAME}</p>
               <p>위치: {item.PATH1} {item.PATH2} {item.PATH3}</p>
               <p>측정소: {item.STATION_NAME}</p>
+              <p>지역: {item.AREA} / {item.CITY}</p>
               <p>담당: {item.AGENT}</p>
               <p>메모: {item.DESCRIPTION}</p>
               <p>등록일: {item.CREATE_DATE}</p>
@@ -111,11 +116,12 @@ export default function () {
       )}
       {isEdit !== null && (
         <EditDevice>
-          <p>장비명: <input value={nameValue} onChange={e => setNameValue(e.target.value)} placeholder='장비명을 적어주세요.' /></p>
-          <p>위치: <input value={locationValue} onChange={e => setLocationValue(e.target.value)} placeholder='위치 ID를 적어주세요.' /></p>
-          <p>측정소: <input value={stationValue} onChange={e => setStationValue(e.target.value)} placeholder='측정소 ID를 적어주세요.' /></p>
-          <p>담당: <input value={agentValue} onChange={e => setAgentValue(e.target.value)} placeholder='담당센터 또는 담당자의 이름을 적어주세요.'/></p>
-          <p>메모: <input value={memoValue} onChange={e => setMemoValue(e.target.value)} placeholder='메모를 적어주세요. (선택)'/></p>
+          <p>장비명: <input value={nameValue} onChange={e => setNameValue(e.target.value.trim())} placeholder='장비명을 적어주세요.' /></p>
+          <p>위치: <input value={locationValue} onChange={e => setLocationValue(e.target.value.trim())} placeholder='위치 ID를 적어주세요.' /></p>
+          <p>측정소: <input value={stationValue} onChange={e => setStationValue(e.target.value.trim())} placeholder='측정소 ID를 적어주세요.' /></p>
+          <p>지역: <input value={areaValue} onChange={e => setAreaValue(e.target.value.trim())} placeholder='지역코드를 적어주세요.' /></p>
+          <p>담당: <input value={agentValue} onChange={e => setAgentValue(e.target.value.trim())} placeholder='담당센터 또는 담당자의 이름을 적어주세요.'/></p>
+          <p>메모: <input value={memoValue} onChange={e => setMemoValue(e.target.value.trim())} placeholder='메모를 적어주세요. (선택)'/></p>
         </EditDevice>
       )}
       { isLoad && <Load /> }
@@ -156,6 +162,7 @@ const List = Styled.li`
   position: relative;
 
   &:hover {
+    background-color: #555;
     & > div {
       display: block;
     }

@@ -10,12 +10,15 @@ module.exports.getDevice = (req, res) => {
     SELECT 
     a.ID, a.NAME, DATE_FORMAT(a.CREATE_DATE, '%Y-%m-%d %H:%i:%S') AS CREATE_DATE, a.IP_ADDRESS, a.AGENT, a.DESCRIPTION, a.LOCATION_ID, a.STATION_ID,
     b.PATH1, b.PATH2, b.PATH3,
-    c.STATION_NAME
+    c.STATION_NAME,
+    d.AREA, d.CITY
     FROM hardware_list AS a 
     LEFT JOIN location_list AS b
     ON a.LOCATION_ID = b.ID 
     LEFT JOIN station_list AS c
-    ON a.STATION_ID = c.ID;
+    ON a.STATION_ID = c.ID
+    LEFT JOIN location_code_list AS d
+    ON a.AREA_CODE_ID = d.ID;
   `, (err, result) => {
     if (err) {
       res.send([]);
@@ -32,15 +35,16 @@ module.exports.addDevice = (req, res) => {
   let nameValue = query.nameValue;
   let locationValue = query.locationValue;
   let stationValue = query.stationValue;
+  let areaValue = query.areaValue;
   let agentValue = query.agentValue;
   let memoValue = query.memoValue;
   let ip = requestIp.getClientIp(req);
 
   db.query(`
     INSERT INTO hardware_list
-    (LOCATION_ID,NAME,IP_ADDRESS,AGENT,DESCRIPTION,STATION_ID)
+    (LOCATION_ID,NAME,IP_ADDRESS,AGENT,DESCRIPTION,STATION_ID,AREA_CODE_ID)
     VALUES
-    ('${locationValue}','${nameValue}','${ip}','${agentValue}','${memoValue}','${stationValue}')
+    ('${locationValue}','${nameValue}','${ip}','${agentValue}','${memoValue}','${stationValue}','${areaValue}')
   `, (err, result) => {
     if (err) {
       res.send(false);
@@ -59,6 +63,7 @@ module.exports.modifyDevice = (req, res) => {
   let nameValue = query.nameValue;
   let locationValue = query.locationValue;
   let stationValue = query.stationValue;
+  let areaValue = query.areaValue;
   let agentValue = query.agentValue;
   let memoValue = query.memoValue;
   let ip = requestIp.getClientIp(req);
@@ -70,7 +75,8 @@ module.exports.modifyDevice = (req, res) => {
     IP_ADDRESS = '${ip}',
     AGENT = '${agentValue}',
     DESCRIPTION = '${memoValue}',
-    STATION_ID = '${stationValue}'
+    STATION_ID = '${stationValue}',
+    AREA_CODE_ID = '${areaValue}'
     WHERE ID = ${id};
   `, (err, result) => {
     if (err) {
@@ -111,6 +117,17 @@ module.exports.getLocation = (req, res) => {
 module.exports.getStation = (req, res) => {
   db.query(`
     SELECT * FROM station_list WHERE 
+    SIDO_NAME LIKE '%${req.params.path}%' ORDER BY STATION_NAME ASC;
+  `, (err, result) => {
+    if (err) log('측정소 조회에 실패하였습니다.', '측정소 조회 실패');
+    res.send(result);
+  });
+}
+
+// 지역코드 리스트 조회 (검색)
+module.exports.getArea = (req, res) => {
+  db.query(`
+    SELECT * FROM location_code_list WHERE 
     SIDO_NAME LIKE '%${req.params.path}%' ORDER BY STATION_NAME ASC;
   `, (err, result) => {
     if (err) log('측정소 조회에 실패하였습니다.', '측정소 조회 실패');
@@ -166,8 +183,25 @@ module.exports.isConnect = (req, res) => {
           let temp = oneLineDateFormat(result).split(' ');
           getInfo.infoList.push({ name: 'shortDust', value: err ? '-' : temp[0] + ' ' + temp[2] + ' ' + temp[3] + ' ' + temp[4] });
           
-          err && console.log(err);
-          res.send(getInfo);
+          db.query(`
+            SELECT DATE,UPDATE_DT FROM long_weather ORDER BY ID DESC LIMIT 1;
+          `, (err, result) => {
+            result[0].DATE = result[0].DATE.replace(/-/g, '');
+            let temp = oneLineDateFormat(result).split(' ');
+            getInfo.infoList.push({ name: 'longWeather', value: err ? '-' : temp[0] + ' ' + temp[2] + ' ' + temp[3] + ' ' + temp[4] });
+          
+            db.query(`
+              SELECT DATE,UPDATE_DT FROM long_dust ORDER BY ID DESC LIMIT 1;
+            `, (err, result) => {
+              result[0].DATE = result[0].DATE.replace(/-/g, '');
+              let temp = oneLineDateFormat(result).split(' ');
+              getInfo.infoList.push({ name: 'longDetailDust', value: err ? '-' : temp[0] + ' ' + temp[2] + ' ' + temp[3] + ' ' + temp[4] });
+            
+              err && console.log(err);
+              res.send(getInfo);
+            });
+          });
+
         });
 
       });
