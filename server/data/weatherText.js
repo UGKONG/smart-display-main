@@ -1,6 +1,6 @@
 const request = require('request');
 const config_api = require('../json/api.json');
-const { useQueryString, log, apiError, useDateFormat } = require('../hook');
+const { useQueryString, log, apiError, useDateFormat, useNow } = require('../hook');
 
 module.exports = {
   getWeatherText() {
@@ -78,18 +78,21 @@ module.exports = {
 
       result.push({ date: dt, time: tm, text });
     });
-
+    
     result.forEach(item => {
-      insertSQL.push(`('${item.time}','${item.date}','${item.text}')`);
+      let dateTime = 
+        ([item.date.slice(0, 4), '-', item.date.slice(4, 6), '-', item.date.slice(6, 8)]).join('') + ' ' +
+        ([item.time.slice(0, 2), ':', item.time.slice(2, 4), ':', item.time.slice(4, 6)]).join('');
+      insertSQL.push(`('${dateTime}','${item.text}','${useNow()}')`);
     });
 
     db.query(`
       INSERT INTO weather_text
-      (TIME,DATE,TEXT)
+      (DATE_TIME,TEXT,CHECK_DT)
       VALUES
       ${insertSQL.join(',')}
       ON DUPLICATE KEY UPDATE
-      TIME=VALUES(TIME),DATE=VALUES(DATE),TEXT=VALUES(TEXT)
+      TEXT=VALUES(TEXT),CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
       if (err) return log('기상개황조회 데이터 수정 요청을 실패하였습니다.', err);
       log(

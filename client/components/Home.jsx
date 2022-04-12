@@ -56,7 +56,10 @@ export default function () {
           infoList.map(item => (
             <ApiList key={item.id}>
               <ApiListTitle>{item.name}</ApiListTitle>
-              <ApiListValue>{item.value}</ApiListValue>
+              <ApiListValue>
+                {item.value.split(' | ')[0]}<br />
+                {item.value.split(' | ')[1]}
+              </ApiListValue>
             </ApiList>
           ))
         }
@@ -71,7 +74,6 @@ const Container = Styled.section`
   justify-content: center;
   flex-direction: column;
   padding-bottom: 20px;
-  height: 100%;
 `;
 const AccessIP = Styled.p`
   position: fixed;
@@ -121,5 +123,5 @@ const ApiListTitle = Styled.h3`
   font-size: 16px;
 `;
 const ApiListValue = Styled.span`
-  
+  text-align: center;
 `;

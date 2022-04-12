@@ -96,19 +96,19 @@ module.exports = {
     });
     
     let insertSQL = [];
-    
     resultArr.forEach(item => {
-      insertSQL.push(`('${item.date}','${item.location}','${item.baseDate}','${item.baseTime}','${item.value10}','${item.value25}')`);
+      insertSQL.push(`('${item.date} 00:00:00','${item.location}','${item.baseDate}','${item.baseTime}','${item.value10}','${item.value25}','${useNow()}')`);
     });
 
     db.query(`
       INSERT INTO short_dust
-      (DATE,LOCATION,BASE_DT,BASE_TM,VALUE10,VALUE25)
+      (DATE_TIME,LOCATION,BASE_DT,BASE_TM,VALUE10,VALUE25,CHECK_DT)
       VALUES
       ${insertSQL.join(',')}
       ON DUPLICATE KEY UPDATE
       BASE_DT=VALUES(BASE_DT),BASE_TM=VALUES(BASE_TM),
-      VALUE10=VALUES(VALUE10),VALUE25=VALUES(VALUE25)
+      VALUE10=VALUES(VALUE10),VALUE25=VALUES(VALUE25),
+      CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
       if (err) return log('대기질 예보통보 조회 데이터 수정 요청을 실패하였습니다.', err);
       log(

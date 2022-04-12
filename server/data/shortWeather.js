@@ -96,7 +96,7 @@ module.exports = {
 
     dateArray.forEach(_date => {
       timeArray.forEach(_time => {
-        let obj = { NX: loc.NX, NY: loc.NY, TIME: '\'' + _time + '\'', DATE: '\'' + _date + '\'' };
+        let obj = { NX: loc.NX, NY: loc.NY, TIME: _time, DATE: _date + '\'' };
         cateArray.forEach(cate => {
           let find = data.find(x => x.fcstDate === _date && x.fcstTime === _time && x.category === cate)?.fcstValue;
           obj[cate] = find ? '\'' + find + '\'' : 'null';
@@ -113,21 +113,26 @@ module.exports = {
     let updateSQL = shortWeatherCategoryList.map(item => item + '=VALUES(' + item + ')');
 
     resultArr.forEach(item => {
-      let itemInsertVal = [loc.NX, loc.NY, item.TIME, item.DATE];
+      let dateTime = '\'' + 
+        ([item.DATE.slice(0, 4), '-', item.DATE.slice(4, 6), '-', item.DATE.slice(6, 8)]).join('') + ' ' +
+        ([item.TIME.slice(0, 2), ':', item.TIME.slice(2, 4), ':', '00']).join('') + '\'';
+      let itemInsertVal = [loc.NX, loc.NY, dateTime];
+      
       shortWeatherCategoryList.forEach(_item => {
         itemInsertVal.push(item[_item]);
       });
 
-      insertSQL.push(`(${itemInsertVal.join(',')},'${time}','${date}')`);
+
+      insertSQL.push(`(${itemInsertVal.join(',')},'${time}','${date}','${useNow()}')`);
     });
-    
+
     db.query(`
       INSERT INTO short_weather
-      (NX,NY,TIME,DATE,${shortWeatherCategoryList.join(',')},BASE_TM,BASE_DT)
+      (NX,NY,DATE_TIME,${shortWeatherCategoryList.join(',')},BASE_TM,BASE_DT,CHECK_DT)
       VALUES
       ${insertSQL.join(',')}
       ON DUPLICATE KEY UPDATE
-      ${updateSQL.join(',')},BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT)
+      ${updateSQL.join(',')},BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
       if (err) return log('단기예보 데이터 수정 요청을 실패하였습니다.', err);
       log(

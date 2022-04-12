@@ -73,16 +73,16 @@ module.exports = {
     let insertSQL = [];
 
     resultArr.forEach(item => {
-      insertSQL.push(`('${item.date}','${item.location}','${item.baseDate}','${item.value}')`);
+      insertSQL.push(`('${item.date} 00:00:00','${item.location}','${item.baseDate}','${item.value}','${useNow()}')`);
     });
     
     db.query(`
       INSERT INTO long_dust
-      (DATE,LOCATION,BASE_DT,VALUE)
+      (DATE_TIME,LOCATION,BASE_DT,VALUE,CHECK_DT)
       VALUES
       ${insertSQL}
       ON DUPLICATE KEY UPDATE
-      BASE_DT=VALUES(BASE_DT),VALUE=VALUES(VALUE)
+      BASE_DT=VALUES(BASE_DT),VALUE=VALUES(VALUE),CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
       if (err) return log('초미세먼지 주간예보 조회 데이터 수정 요청을 실패하였습니다.', err);
       log(

@@ -104,17 +104,18 @@ module.exports = {
     let insertSQL = [];
 
     resultArr.forEach(item => {
-      insertSQL.push(`('${areaCode}','${item.date}',${item.min},${item.max},'${time}','${date}')`);
+      insertSQL.push(`('${areaCode}','${item.date} 00:00:00',${item.min},${item.max},'${time}','${date}','${useNow()}')`);
     });
 
     db.query(`
       INSERT INTO long_weather
-      (AREA_CODE,DATE,MIN,MAX,BASE_TM,BASE_DT)
+      (AREA_CODE,DATE_TIME,MIN,MAX,BASE_TM,BASE_DT,CHECK_DT)
       VALUES
       ${insertSQL.join(',')}
       ON DUPLICATE KEY UPDATE
       MIN=VALUES(MIN),MAX=VALUES(MAX),
-      BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT)
+      BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),
+      CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
       if (err) return log('중기예보 조회 데이터 수정 요청을 실패하였습니다.', err);
       log(

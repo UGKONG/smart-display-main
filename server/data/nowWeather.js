@@ -62,19 +62,24 @@ module.exports = {
 
     let insertSQL = [];
     let updateSQL = [];
+
     nowWeatherCategoryList.forEach(item => {
       let cate = data.find(x => x.category === item);
       insertSQL.push(cate ? cate?.obsrValue : null);
       updateSQL.push(item + '=VALUES(' + item + ')');
     });
+    
+    let dateTime = 
+      ([date.slice(0, 4), '-', date.slice(4, 6), '-', date.slice(6, 8)]).join('') + ' ' +
+      ([time.slice(0, 2), ':', time.slice(2, 4), ':', '00']).join('');
 
     db.query(`
       INSERT INTO now_weather
-      (NX,NY,BASE_TM,BASE_DT,TIME,DATE,${nowWeatherCategoryList.join(',')})
+      (NX,NY,BASE_TM,BASE_DT,DATE_TIME,${nowWeatherCategoryList.join(',')},CHECK_DT)
       VALUES
-      (${loc.NX},${loc.NY},'${time}','${date}','${time}','${date}',${insertSQL.join(',')})
+      (${loc.NX},${loc.NY},'${time}','${date}','${dateTime}',${insertSQL.join(',')},'${useNow()}')
       ON DUPLICATE KEY UPDATE
-      ${updateSQL.join(',')}
+      ${updateSQL.join(',')},CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
       if (err) return log('초단기실황 데이터 수정 요청을 실패하였습니다.', err);
       log(

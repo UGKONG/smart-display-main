@@ -11,7 +11,7 @@ module.exports.getDevice = (req, res) => {
     a.ID, a.NAME, DATE_FORMAT(a.CREATE_DATE, '%Y-%m-%d %H:%i:%S') AS CREATE_DATE, a.IP_ADDRESS, a.AGENT, a.DESCRIPTION, a.LOCATION_ID, a.STATION_ID,
     b.PATH1, b.PATH2, b.PATH3,
     c.STATION_NAME,
-    d.AREA, d.CITY
+    d.ID AS AREA_CODE_ID, d.AREA, d.CITY
     FROM hardware_list AS a 
     LEFT JOIN location_list AS b
     ON a.LOCATION_ID = b.ID 
@@ -128,7 +128,7 @@ module.exports.getStation = (req, res) => {
 module.exports.getArea = (req, res) => {
   db.query(`
     SELECT * FROM location_code_list WHERE 
-    SIDO_NAME LIKE '%${req.params.path}%' ORDER BY STATION_NAME ASC;
+    AREA LIKE '%${req.params.path}%' ORDER BY CITY ASC;
   `, (err, result) => {
     if (err) log('측정소 조회에 실패하였습니다.', '측정소 조회 실패');
     res.send(result);
@@ -145,57 +145,54 @@ module.exports.isConnect = (req, res) => {
   let getInfo = {};
   getInfo.infoList = [];
   
-  const oneLineDateFormat = (result) => {
-    let data = result[0];
-    let Y = data?.DATE?.slice(0, 4);
-    let M = data?.DATE?.slice(4, 6);
-    let D = data?.DATE?.slice(6, 8);
-    let h = data?.TIME?.slice(0, 2);
-    let m = data?.TIME?.slice(2, 4);
-    let updateDT = useDateFormat(data?.UPDATE_DT);
-    return Y + '-' + M + '-' + D + ' ' + h + ':' + m + ' (업데이트: ' + updateDT + ')';
+  const DT_FORMAT = (result = []) => {
+    let date;
+    let { DATE_TIME, CHECK_DT } = result[0];
+    return RESULT_TXT({ DATE_TIME, CHECK_DT });
+  }
+
+  const RESULT_TXT = ({ DATE_TIME, CHECK_DT }) => {
+    return `마지막 데이터: ${DATE_TIME} | 업데이트 시간: ${CHECK_DT}`;
+    
   }
 
   db.query(`
-    SELECT DATE,TIME,UPDATE_DT FROM now_weather ORDER BY ID DESC LIMIT 1;
+    SELECT DATE_TIME,CHECK_DT FROM now_weather ORDER BY ID DESC LIMIT 1;
   `, (err, result) => {
+    let DT = err ? '-' : DT_FORMAT(result);
     getInfo.ip = requestIp.getClientIp(req);
     getInfo.result = err ? false : true;
-    getInfo.infoList.push({ name: 'nowWeather', value: err ? '-' : oneLineDateFormat(result) });
+    getInfo.infoList.push({ name: 'nowWeather', value: err ? '-' : DT });
 
     db.query(`
-      SELECT DATE,TIME,UPDATE_DT FROM short_weather ORDER BY ID DESC LIMIT 1;
+      SELECT DATE_TIME,CHECK_DT FROM short_weather ORDER BY ID DESC LIMIT 1;
     `, (err, result) => {
-      getInfo.infoList.push({ name: 'shortWeather', value: err ? '-' : oneLineDateFormat(result) });
+      DT = err ? '-' : DT_FORMAT(result);
+      getInfo.infoList.push({ name: 'shortWeather', value: err ? '-' : DT });
 
       db.query(`
-        SELECT DATE_TIME,UPDATE_DT FROM now_dust ORDER BY ID DESC LIMIT 1;
+        SELECT DATE_TIME,CHECK_DT FROM now_dust ORDER BY ID DESC LIMIT 1;
       `, (err, result) => {
-        let dateTime = result[0].DATE_TIME;
-        result[0].DATE = dateTime.split(' ')[0].replace(/-/g, '');
-        result[0].TIME = dateTime.split(' ')[1].replace(/:/g, '');
-        getInfo.infoList.push({ name: 'nowDust', value: err ? '-' : oneLineDateFormat(result) });
+        DT = err ? '-' : DT_FORMAT(result);
+        getInfo.infoList.push({ name: 'nowDust', value: err ? '-' : DT });
         
         db.query(`
-          SELECT DATE,UPDATE_DT FROM short_dust ORDER BY ID DESC LIMIT 1;
+          SELECT DATE_TIME,CHECK_DT FROM short_dust ORDER BY ID DESC LIMIT 1;
         `, (err, result) => {
-          result[0].DATE = result[0].DATE.replace(/-/g, '');
-          let temp = oneLineDateFormat(result).split(' ');
-          getInfo.infoList.push({ name: 'shortDust', value: err ? '-' : temp[0] + ' ' + temp[2] + ' ' + temp[3] + ' ' + temp[4] });
+          DT = err ? '-' : DT_FORMAT(result);
+          getInfo.infoList.push({ name: 'shortDust', value: err ? '-' : DT });
           
           db.query(`
-            SELECT DATE,UPDATE_DT FROM long_weather ORDER BY ID DESC LIMIT 1;
+            SELECT DATE_TIME,CHECK_DT FROM long_weather ORDER BY ID DESC LIMIT 1;
           `, (err, result) => {
-            result[0].DATE = result[0].DATE.replace(/-/g, '');
-            let temp = oneLineDateFormat(result).split(' ');
-            getInfo.infoList.push({ name: 'longWeather', value: err ? '-' : temp[0] + ' ' + temp[2] + ' ' + temp[3] + ' ' + temp[4] });
+            DT = err ? '-' : DT_FORMAT(result);
+            getInfo.infoList.push({ name: 'longWeather', value: err ? '-' : DT });
           
             db.query(`
-              SELECT DATE,UPDATE_DT FROM long_dust ORDER BY ID DESC LIMIT 1;
+              SELECT DATE_TIME,CHECK_DT FROM long_dust ORDER BY ID DESC LIMIT 1;
             `, (err, result) => {
-              result[0].DATE = result[0].DATE.replace(/-/g, '');
-              let temp = oneLineDateFormat(result).split(' ');
-              getInfo.infoList.push({ name: 'longDetailDust', value: err ? '-' : temp[0] + ' ' + temp[2] + ' ' + temp[3] + ' ' + temp[4] });
+              DT = err ? '-' : DT_FORMAT(result);
+              getInfo.infoList.push({ name: 'longDetailDust', value: DT });
             
               err && console.log(err);
               res.send(getInfo);
