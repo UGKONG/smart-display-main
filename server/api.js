@@ -2,7 +2,7 @@
 const requestIp = require('request-ip');
 const { db } = require('../web');
 const { useDateFormat } = require('./hook');
-const { log } = require('./hook');
+const { log, clientSuccess, clientFail } = require('./hook');
 
 // 장비 리스트 조회
 module.exports.getDevice = (req, res) => {
@@ -216,4 +216,37 @@ module.exports.getLog = (req, res) => {
     if (err) return log('log 리스트 조회에 실패하였습니다.', err);
     res.send(result);
   });
+}
+
+// 현재상태 API (하늘상태, 현재기온, 미세먼지, 초미세먼지, 오존);
+module.exports.nowState = (req, res) => {
+  let id = req.query?.id;
+  if (!id) return res.send(clientFail('hardware id is not found'));
+  
+  db.query(`
+    SELECT
+    a.ID, b.NX, b.NY, 
+    c.PTY, c.REH, c.RN1, c.T1H, c.UUU, c.VEC, c.VVV, c.WSD, c.DATE_TIME AS WEATHER_DATE,
+    e.khaiValue, e.so2Value, e.coValue, e.no2Value, e.pm10Value, e.pm25Value, e.o3Value,
+    e.khaiGrade, e.so2Grade, e.coGrade, e.no2Grade, e.pm10Grade, e.pm25Grade, e.o3Grade,
+	  e.DATE_TIME AS DUST_DATE, DATE_FORMAT(NOW(), '%Y-%m-%d %h:%m:%s') AS NOW
+    FROM
+    hardware_list a
+    INNER JOIN location_list b
+    ON a.LOCATION_ID = b.ID
+    INNER JOIN now_weather c
+    ON b.NX = c.NX AND b.NY = c.NY
+    INNER JOIN station_list d
+    ON a.STATION_ID = d.ID
+    INNER JOIN now_dust e
+    ON d.STATION_NAME = e.STATION
+    WHERE a.ID = ${id}
+    ORDER BY c.DATE_TIME desc, e.DATE_TIME desc
+    LIMIT 1;
+  `, (err, result) => {
+    if (err) return log('클라이언트에서 현재상태 API를 요청중에 에러가 발생하였습니다.', err);
+    if (result.length === 0) return res.send(clientFail('hardware is not found'));
+
+    res.send(clientSuccess(result[0]));
+  })
 }

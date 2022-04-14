@@ -30,7 +30,8 @@ const {
   getLocation,
   getStation,
   pageNotFound, 
-  getLog 
+  getLog,
+  nowState,
 } = require('./server/api');
 
 // API
@@ -42,4 +43,7 @@ app.delete('/api/delDevice/:id', delDevice);
 app.get('/api/getLocation/:path', getLocation);
 app.get('/api/getStation/:path', getStation);
 app.get('/api/log', getLog);
+
+app.get('/api/nowState', nowState);
+
 app.get('*', pageNotFound);

@@ -63,6 +63,7 @@ module.exports.useCleanArray = (allArr = [], fieldName, returnKey = []) => {
 
 // log.txt에 log 저장
 module.exports.log = (logText = '', error) => {
+  if (ip.address() === '192.168.0.90') return;
   db.query(`
     INSERT INTO log (DESCRIPTION,IP) VALUES ('${logText}','${ip.address()}');
   `, (err, result) => {
@@ -79,3 +80,11 @@ module.exports.apiError = (code) => {
     { code, msg: find.msg, description: find.desc }
   );
 }
+
+// 클라이언트로 전송 양식
+module.exports.clientSuccess = (result, msg = 'success') => (
+  { result: true , data: result, count: result.length ?? 1, msg }
+)
+module.exports.clientFail = (msg = 'fail') => (
+  { result: false , data: null, count: 0, msg }
+)
