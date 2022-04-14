@@ -232,19 +232,19 @@ module.exports.nowState = (req, res) => {
 	  e.DATE_TIME AS DUST_DATE, DATE_FORMAT(NOW(), '%Y-%m-%d %h:%m:%s') AS NOW
     FROM
     hardware_list a
-    INNER JOIN location_list b
-    ON a.LOCATION_ID = b.ID
-    INNER JOIN now_weather c
-    ON b.NX = c.NX AND b.NY = c.NY
-    INNER JOIN station_list d
-    ON a.STATION_ID = d.ID
-    INNER JOIN now_dust e
-    ON d.STATION_NAME = e.STATION
+    LEFT JOIN location_list b ON a.LOCATION_ID = b.ID
+    LEFT JOIN now_weather c ON b.NX = c.NX AND b.NY = c.NY
+    LEFT JOIN station_list d ON a.STATION_ID = d.ID
+    LEFT JOIN now_dust e ON d.STATION_NAME = e.STATION
     WHERE a.ID = ${id}
     ORDER BY c.DATE_TIME desc, e.DATE_TIME desc
     LIMIT 1;
   `, (err, result) => {
-    if (err) return log('클라이언트에서 현재상태 API를 요청중에 에러가 발생하였습니다.', err);
+    if (err) {
+      log('클라이언트에서 현재상태 API를 요청중에 에러가 발생하였습니다.', err);
+      res.send(clientFail('API error'));
+      return;
+    }
     if (result.length === 0) return res.send(clientFail('hardware is not found'));
 
     res.send(clientSuccess(result[0]));
