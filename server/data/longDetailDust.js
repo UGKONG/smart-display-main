@@ -1,7 +1,7 @@
 const request = require('request');
 const config_api = require('../json/api.json');
 const { useQueryString, log, apiError, useDateFormat, useNow } = require('../hook');
-const { longDustCategoryList, shortDetailDustGetTimeList } = require('../json/static.json');
+const { longDustCategoryList, longDetailDustGetTimeList } = require('../json/static.json');
 
 module.exports = {
   getLongDetailDustSet (lastDataRequest) {
@@ -9,7 +9,7 @@ module.exports = {
     let [date, time] = useNow({ hour: 0, format: true }).split(' ');
     let [h] = time.split(':');
     time = h + '30';
-    let isGetMinutes = shortDetailDustGetTimeList.indexOf(time);
+    let isGetMinutes = longDetailDustGetTimeList.indexOf(time);
     
     if (isGetMinutes > -1) {  // 현재 시간이 요청 시간일때
       let dateTime = useNow({ hour: lastDataRequest ? -24 : 0, format: true });

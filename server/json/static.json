@@ -45,7 +45,7 @@
   "shortDustGetTimeList": [
     "0500","1100","1700","2300"
   ],
-  "shortDetailDustGetTimeList": [
+  "longDetailDustGetTimeList": [
     "1730"
   ]
 }

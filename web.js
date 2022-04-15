@@ -32,8 +32,6 @@ const {
   pageNotFound, 
   getLog,
   getData,
-  nowState,
-  shortState,
 } = require('./server/api');
 
 // API
