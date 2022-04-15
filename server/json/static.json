@@ -18,25 +18,6 @@
     { "id": "33", "msg":	"UNSIGNED_CALL_ERROR",	"desc": "서명되지 않은 호출" },
     { "id": "99", "msg":	"UNKNOWN_ERROR",	"desc": "기타에러" }
   ],
-  "sidoNameList": [
-    { "long": "서울특별시", "short": "서울" },
-    { "long": "부산광역시", "short": "부산" },
-    { "long": "인천광역시", "short": "인천" },
-    { "long": "대구광역시", "short": "대구" },
-    { "long": "울산광역시", "short": "울산" },
-    { "long": "대전광역시", "short": "대전" },
-    { "long": "광주광역시", "short": "광주" },
-    { "long": "세종특별자치시", "short": "세종" },
-    { "long": "제주특별자치도", "short": "제주" },
-    { "long": "강원도", "short": "강원" },
-    { "long": "경기도", "short": "경기" },
-    { "long": "경상북도", "short": "경북" },
-    { "long": "경상남도", "short": "경남" },
-    { "long": "충청북도", "short": "충북" },
-    { "long": "충청남도", "short": "충남" },
-    { "long": "전라북도", "short": "전북" },
-    { "long": "전라남도", "short": "전남" }
-  ],
   "nowWeatherCategoryList": [
     "PTY","REH","RN1","T1H","UUU","VEC","VVV","WSD"
   ],

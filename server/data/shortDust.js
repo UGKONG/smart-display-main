@@ -97,6 +97,9 @@ module.exports = {
     
     let insertSQL = [];
     resultArr.forEach(item => {
+      if (item.location === '경기북부' || item.location === '경기남부') item.location = '경기';
+      if (item.location === '영동' || item.location === '영서') item.location = '강원';
+      
       insertSQL.push(`('${item.date} 00:00:00','${item.location}','${item.baseDate}','${item.baseTime}','${item.value10}','${item.value25}','${useNow()}')`);
     });
 

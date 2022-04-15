@@ -30,7 +30,7 @@ module.exports.useNow = (option = { hour: 0, format: true }) => {
 }
 
 // 날짜 & 시간 Format
-module.exports.useDateFormat = (date) => {
+module.exports.useDateFormat = (date, option = false) => {
   if (!date) return null;
   let Y = String(date.getFullYear());
   let M = String((date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1));
@@ -40,6 +40,7 @@ module.exports.useDateFormat = (date) => {
   let s = String(date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
 
   let result = Y + '-' + M + '-' + D + ' ' + h + ':' + m + ':' + s;
+  if (option) result = Y + '-' + M + '-' + D;
   return result;
 }
 
@@ -63,7 +64,6 @@ module.exports.useCleanArray = (allArr = [], fieldName, returnKey = []) => {
 
 // log.txt에 log 저장
 module.exports.log = (logText = '', error) => {
-  if (ip.address() === '192.168.0.90') return;
   db.query(`
     INSERT INTO log (DESCRIPTION,IP) VALUES ('${logText}','${ip.address()}');
   `, (err, result) => {
@@ -81,10 +81,7 @@ module.exports.apiError = (code) => {
   );
 }
 
-// 클라이언트로 전송 양식
-module.exports.clientSuccess = (result, msg = 'success') => (
-  { result: true , data: result, count: result.length ?? 1, msg }
-)
-module.exports.clientFail = (msg = 'fail') => (
-  { result: false , data: null, count: 0, msg }
+// 클라이언트로 전송 실패 양식
+module.exports.fail = (msg = 'fail') => (
+  { result: false, msg }
 )

@@ -31,7 +31,9 @@ const {
   getStation,
   pageNotFound, 
   getLog,
+  getData,
   nowState,
+  shortState,
 } = require('./server/api');
 
 // API
@@ -44,6 +46,6 @@ app.get('/api/getLocation/:path', getLocation);
 app.get('/api/getStation/:path', getStation);
 app.get('/api/log', getLog);
 
-app.get('/api/nowState', nowState);
+app.get('/api/getData', getData);
 
 app.get('*', pageNotFound);

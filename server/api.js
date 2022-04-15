@@ -2,7 +2,7 @@
 const requestIp = require('request-ip');
 const { db } = require('../web');
 const { useDateFormat } = require('./hook');
-const { log, clientSuccess, clientFail } = require('./hook');
+const { log, fail } = require('./hook');
 
 // 장비 리스트 조회
 module.exports.getDevice = (req, res) => {
@@ -137,7 +137,7 @@ module.exports.getArea = (req, res) => {
 
 // 404 페이지를 찾을 수 없습니다.
 module.exports.pageNotFound = (req, res) => {
-  res.send('Page Not Found');
+  res.send(fail('Page Not Found'));
 }
 
 // DB 연결상태 확인
@@ -218,35 +218,81 @@ module.exports.getLog = (req, res) => {
   });
 }
 
-// 현재상태 API (하늘상태, 현재기온, 미세먼지, 초미세먼지, 오존);
-module.exports.nowState = (req, res) => {
+// 스마트 가로등 클라이언트에서 요청
+module.exports.getData = (req, res) => {
   let id = req.query?.id;
-  if (!id) return res.send(clientFail('hardware id is not found'));
-  
+
+  if (!id) return res.send(fail('Hardware\'s id is not found'));
+
+  let now = new Date();
+  let data = {
+    now: null,
+    today: null,
+    tomorrow: null,
+    afterTomorrow: null,
+    week: null,
+    text: null,
+  }
+
+  // now 요청
   db.query(`
     SELECT
-    a.ID, b.NX, b.NY, 
+    c.ID, b.NX, b.NY, 
     c.PTY, c.REH, c.RN1, c.T1H, c.UUU, c.VEC, c.VVV, c.WSD, c.DATE_TIME AS WEATHER_DATE,
     e.khaiValue, e.so2Value, e.coValue, e.no2Value, e.pm10Value, e.pm25Value, e.o3Value,
     e.khaiGrade, e.so2Grade, e.coGrade, e.no2Grade, e.pm10Grade, e.pm25Grade, e.o3Grade,
-	  e.DATE_TIME AS DUST_DATE, DATE_FORMAT(NOW(), '%Y-%m-%d %h:%m:%s') AS NOW
-    FROM
-    hardware_list a
+	  e.DATE_TIME AS DUST_DATE
+    FROM hardware_list a
     LEFT JOIN location_list b ON a.LOCATION_ID = b.ID
     LEFT JOIN now_weather c ON b.NX = c.NX AND b.NY = c.NY
     LEFT JOIN station_list d ON a.STATION_ID = d.ID
     LEFT JOIN now_dust e ON d.STATION_NAME = e.STATION
-    WHERE a.ID = ${id}
+    WHERE a.ID = '${id}'
     ORDER BY c.DATE_TIME desc, e.DATE_TIME desc
     LIMIT 1;
   `, (err, result) => {
-    if (err) {
-      log('클라이언트에서 현재상태 API를 요청중에 에러가 발생하였습니다.', err);
-      res.send(clientFail('API error'));
-      return;
-    }
-    if (result.length === 0) return res.send(clientFail('hardware is not found'));
+    if (err) data.now = null;
+    if (result.length === 0) data.now = null;
 
-    res.send(clientSuccess(result[0]));
-  })
+    // 오늘
+    data.now = result[0] ?? null;
+
+    db.query(`
+      SELECT a.NAME,
+      c.ID, c.SKY, c.TMP, c.POP,
+      e.VALUE10, e.VALUE25,
+      c.DATE_TIME AS WEATHER_DATE,
+      e.DATE_TIME AS DUST_DATE,
+      DATE_FORMAT(CONVERT(c.DATE_TIME, DATE), '%Y-%m-%d') AS DATE
+      FROM hardware_list a
+      LEFT JOIN location_list b ON a.LOCATION_ID = b.ID
+      LEFT JOIN short_weather c ON b.NX = c.NX AND b.NY = c.NY
+      LEFT JOIN station_list d ON a.STATION_ID = d.ID
+      LEFT JOIN short_dust e ON d.SIDO_NAME = e.LOCATION
+      WHERE a.ID = '${id}' AND 
+      CONVERT(c.DATE_TIME, DATE) >= '${useDateFormat(now, true)}' AND
+      CONVERT(e.DATE_TIME, DATE) >= '${useDateFormat(now, true)}' AND
+      CONVERT(c.DATE_TIME, DATE) = CONVERT(e.DATE_TIME, DATE)
+      ORDER BY c.DATE_TIME ASC
+    `, (err, result) => {
+      if (err || result?.length === 0) {
+        data.today = null;
+        data.tomorrow = null;
+        data.afterTomorrow = null;
+      }
+      
+      // 오늘
+      data.today = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? null;
+      
+      // 내일
+      now.setDate(now.getDate() + 1);
+      data.tomorrow = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? null;
+      
+      // 모레
+      now.setDate(now.getDate() + 1);
+      data.afterTomorrow = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? null;
+
+      res.send(data);
+    });
+  });
 }

@@ -17,7 +17,7 @@ function getFunctions (minutes, isAuto) {
     (minutes == config_api.nowDustGetMinutes) && nowDust.getNowDustSet();
     (minutes == config_api.weatherTextGetMinutes) && weatherText.getWeatherText();
     (minutes == config_api.shortDustGetMinutes) && shortDust.getShortDustSet(minutes < config_api.shortDustGetMinutes);
-    (minutes == config_api.longDetailDust) && longDetailDust.getLongDetailDustSet(minutes < config_api.longDetailDustGetMinutes);
+    (minutes == config_api.longDetailDustGetMinutes) && longDetailDust.getLongDetailDustSet(minutes < config_api.longDetailDustGetMinutes);
   } else {
     nowWeather.getNowWeatherSet(minutes < config_api.nowWeatherGetMinutes);
     shortWeather.getShortWeatherSet(minutes < config_api.shortWeatherGetMinutes);
