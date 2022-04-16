@@ -1,7 +1,6 @@
 const request = require('request');
-const config_api = require('../json/api.json');
-const { useQueryString, log, apiError, useDateFormat, useNow } = require('../hook');
-const { longDustCategoryList, longDetailDustGetTimeList } = require('../json/static.json');
+const conf = require('../config.json').api.subject.longDetailDust;
+const { useQueryString, log, apiError, useNow } = require('../hook');
 
 module.exports = {
   getLongDetailDustSet (lastDataRequest) {
@@ -9,7 +8,7 @@ module.exports = {
     let [date, time] = useNow({ hour: 0, format: true }).split(' ');
     let [h] = time.split(':');
     time = h + '30';
-    let isGetMinutes = longDetailDustGetTimeList.indexOf(time);
+    let isGetMinutes = conf.time.indexOf(time);
     
     if (isGetMinutes > -1) {  // 현재 시간이 요청 시간일때
       let dateTime = useNow({ hour: lastDataRequest ? -24 : 0, format: true });
@@ -23,7 +22,7 @@ module.exports = {
   getLongDetailDust ({ date }) {
 
     let query = useQueryString({
-      serviceKey: config_api.apiKey,
+      serviceKey: conf.apiKey,
       pageNo: 1,
       numOfRows: 10000,
       returnType: 'json',
@@ -48,7 +47,7 @@ module.exports = {
         if (err) return log('초미세먼지 주간예보 조회 데이터 요청에 실패하였습니다.', err);
         // log('초미세먼지 주간예보 조회 데이터 요청에 성공하였습니다.');
 
-        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
+        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (longDetailDust)');
 
         let data = JSON.parse(result?.body)?.response?.body?.items[0];
         this.newLongDetailDust({ data });
@@ -59,7 +58,7 @@ module.exports = {
     let resultArr = [];
     let baseDate = data.presnatnDt;
     
-    longDustCategoryList.forEach(item => {
+    conf.category.forEach(item => {
       let date = data[item + 'Dt'];
       let contents = data[item + 'Cn'];
       if (contents.indexOf(',') > -1) contents = contents.split(', ');
@@ -77,17 +76,17 @@ module.exports = {
     });
     
     db.query(`
-      INSERT INTO long_dust
+      INSERT INTO long_detail_dust
       (DATE_TIME,LOCATION,BASE_DT,VALUE,CHECK_DT)
       VALUES
       ${insertSQL}
       ON DUPLICATE KEY UPDATE
       BASE_DT=VALUES(BASE_DT),VALUE=VALUES(VALUE),CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log('초미세먼지 주간예보 조회 데이터 수정 요청을 실패하였습니다.', err);
+      if (err) return log('초미세먼지 주간예보 조회 실패 (모든장비)', err);
       log(
-        '초미세먼지 주간예보 조회: 새로운 데이터 조회',
-        '초미세먼지 주간예보 조회: 새로운 데이터 조회'
+        '초미세먼지 주간예보 조회: 새로운 데이터 조회 (모든장비)',
+        '초미세먼지 주간예보 조회: 새로운 데이터 조회 (모든장비)'
       );
     });
   }

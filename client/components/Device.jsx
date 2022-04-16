@@ -71,7 +71,7 @@ export default function () {
       setNameValue(find.NAME);
       setLocationValue(find.LOCATION_ID);
       setStationValue(find.STATION_ID);
-      setAreaValue(find.AREA_CODE_ID);
+      setAreaValue(find.AREA_ID);
       setAgentValue(find.AGENT);
       setMemoValue(find.DESCRIPTION);
     }

@@ -4,7 +4,7 @@
 const express = require('express');
 const app = express();
 const mysql = require('mysql');
-const db = mysql.createConnection(require('./server/json/db.json'));
+const db = mysql.createConnection(require('./server/config.json').db);
 
 // 서버엔진, 데이터베이스 내보내기
 module.exports = { db, app };

@@ -1,6 +1,6 @@
 const ip = require('ip');
 const _ = require('lodash');
-const { apiErrorCodeList } = require('./json/static.json');
+const apiErrorCodeList = require('./config.json').api.errorCodeList;
 
 // Object -> Query (String) 변환 함수
 module.exports.useQueryString = (obj) => {

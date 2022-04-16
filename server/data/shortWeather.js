@@ -1,7 +1,6 @@
 const request = require('request');
-const config_api = require('../json/api.json');
+const conf = require('../config.json').api.subject.shortWeather;
 const { useNow, useQueryString, useDateFormat, log, apiError, useCleanArray } = require('../hook');
-const { shortWeatherCategoryList, shortWeatherGetTimeList } = require('../json/static.json');
 
 module.exports = {
   getShortWeatherSet (lastDataRequest) {
@@ -9,7 +8,7 @@ module.exports = {
     let [date, time] = dateTime.split(' ');
     time = time.slice(0, 2) + '00';
 
-    let isGetMinutes = shortWeatherGetTimeList.indexOf(time);
+    let isGetMinutes = conf.time.indexOf(time);
     if (isGetMinutes > -1) {  // 현재 시간이 요청 시간일때
       dateTime = useNow({ hour: lastDataRequest ? -3 : 0, format: false });
       [date, time] = dateTime.split(' ');
@@ -18,7 +17,7 @@ module.exports = {
       let _date = new Date();
       _date.setHours(0);_date.setMinutes(0);_date.setSeconds(0);
       
-      let getTimeList = [...shortWeatherGetTimeList];
+      let getTimeList = [...conf.time];
       getTimeList.push(time);
       getTimeList = getTimeList.sort((x, y) => x - y);
       let getTimeIdx = getTimeList.indexOf(time);
@@ -36,20 +35,20 @@ module.exports = {
       date = y + m + d;
     }
     
-
     db.query(`
-      SELECT DISTINCT b.NX, b.NY FROM 
+      SELECT DISTINCT a.ID, b.NX, b.NY FROM 
       hardware_list AS a LEFT JOIN location_list AS b 
       ON a.LOCATION_ID = b.ID
     `, (err, result) => {
       if (err) return log('위치 정보 조회 요청에 실패하였습니다.', err);
-      result.forEach(loc => this.getShortWeather({ time, date, loc }));
+      result.forEach(loc => this.getShortWeather({ time, date, loc }, loc.ID));
     });
+
   },
-  getShortWeather ({ time, date, loc }) {
+  getShortWeather ({ time, date, loc }, hardwareId) {
 
     let query = useQueryString({
-      ServiceKey: config_api.apiKey,
+      ServiceKey: conf.apiKey,
       pageNo: 1,
       numOfRows: 10000,
       dataType: 'JSON',
@@ -75,16 +74,15 @@ module.exports = {
     request(`http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?${query}`,
       (err, result) => {
         if (err) return log('단기예보조회 데이터 요청에 실패하였습니다. (날짜: ' + date + ', 시간: ' + time + ')', err);
-        // log('단기예보조회 데이터 요청에 성공하였습니다. (날짜: ' + date + ', 시간: ' + time + ')');
         
-        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
+        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (shortWeather)');
 
         let data = JSON.parse(result?.body)?.response?.body?.items?.item;
-        this.newShortWeather({ data, loc, date, time });
+        this.newShortWeather({ data, loc, date, time }, hardwareId);
       }
     );
   },
-  newShortWeather ({ data, loc, time, date }) {
+  newShortWeather ({ data, loc, time, date }, hardwareId) {
     let resultArr = [];
     let dateArray = useCleanArray(data, 'fcstDate').map(item => item.fcstDate);
     let timeArray = useCleanArray(data, 'fcstTime').map(item => item.fcstTime);
@@ -110,7 +108,7 @@ module.exports = {
     });
     
     let insertSQL = [];
-    let updateSQL = shortWeatherCategoryList.map(item => item + '=VALUES(' + item + ')');
+    let updateSQL = conf.category.map(item => item + '=VALUES(' + item + ')');
 
     resultArr.forEach(item => {
       let dateTime = '\'' + 
@@ -118,7 +116,7 @@ module.exports = {
         ([item.TIME.slice(0, 2), ':', item.TIME.slice(2, 4), ':', '00']).join('') + '\'';
       let itemInsertVal = [loc.NX, loc.NY, dateTime];
       
-      shortWeatherCategoryList.forEach(_item => {
+      conf.category.forEach(_item => {
         itemInsertVal.push(item[_item]);
       });
 
@@ -128,16 +126,16 @@ module.exports = {
 
     db.query(`
       INSERT INTO short_weather
-      (NX,NY,DATE_TIME,${shortWeatherCategoryList.join(',')},BASE_TM,BASE_DT,CHECK_DT)
+      (NX,NY,DATE_TIME,${conf.category.join(',')},BASE_TM,BASE_DT,CHECK_DT)
       VALUES
       ${insertSQL.join(',')}
       ON DUPLICATE KEY UPDATE
       ${updateSQL.join(',')},BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log('단기예보 데이터 수정 요청을 실패하였습니다.', err);
+      if (err) return log(`단기예보 데이터 조회 실패 (장비: ${hardwareId})`, err);
       log(
-        '단기예보: 새로운 데이터 조회 (NX=' + loc.NX + ', NY=' + loc.NY + ')',
-        '단기예보: 새로운 데이터 조회 (NX=' + loc.NX + ', NY=' + loc.NY + ')'
+        `단기예보: 새로운 데이터 조회 (장비: ${hardwareId})`,
+        `단기예보: 새로운 데이터 조회 (장비: ${hardwareId})`
       );
     });
   }

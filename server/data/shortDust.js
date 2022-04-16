@@ -1,7 +1,6 @@
 const request = require('request');
-const config_api = require('../json/api.json');
-const { useNow, useQueryString, useDateFormat, log, apiError, useCleanArray } = require('../hook');
-const { shortDustCategoryList, shortDustGetTimeList } = require('../json/static.json');
+const conf = require('../config.json').api.subject.shortDust;
+const { useNow, useQueryString, useDateFormat, log, apiError } = require('../hook');
 
 module.exports = {
   getShortDustSet (lastDataRequest) {
@@ -9,7 +8,7 @@ module.exports = {
     let [date, time] = dateTime.split(' ');
     time = time.slice(0, 2) + '00';
 
-    let isGetMinutes = shortDustGetTimeList.indexOf(time);
+    let isGetMinutes = conf.time.indexOf(time);
     if (isGetMinutes > -1) {  // 현재 시간이 요청 시간일때
       dateTime = useNow({ hour: lastDataRequest ? -6 : 0, format: true });
       [date, time] = dateTime.split(' ');
@@ -18,7 +17,7 @@ module.exports = {
       let _date = new Date();
       _date.setHours(0);_date.setMinutes(0);_date.setSeconds(0);
       
-      let getTimeList = [...shortDustGetTimeList];
+      let getTimeList = [...conf.time];
       getTimeList.push(time);
       getTimeList = getTimeList.sort((x, y) => x - y);
       let getTimeIdx = getTimeList.indexOf(time);
@@ -39,7 +38,7 @@ module.exports = {
   getShortDust ({ date }) {
 
     let query = useQueryString({
-      ServiceKey: config_api.apiKey,
+      ServiceKey: conf.apiKey,
       pageNo: 1,
       numOfRows: 10000,
       returnType: 'json',
@@ -64,7 +63,7 @@ module.exports = {
         if (err) return log('대기질 예보통보 조회 데이터 요청에 실패하였습니다.', err);
         // log('대기질 예보통보 조회 데이터 요청에 성공하였습니다.');
 
-        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
+        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (shortDust)');
 
         let data = JSON.parse(result?.body)?.response?.body?.items;
         this.newShortDust({ data, date });
@@ -86,8 +85,8 @@ module.exports = {
       });
     });
     
-    let PM10Arr = resultArr.filter(x => x.category === shortDustCategoryList[0]);
-    let PM25Arr = resultArr.filter(x => x.category === shortDustCategoryList[1]);
+    let PM10Arr = resultArr.filter(x => x.category === conf.category[0]);
+    let PM25Arr = resultArr.filter(x => x.category === conf.category[1]);
     resultArr = [];
     
     PM10Arr.forEach(item => {
@@ -113,10 +112,10 @@ module.exports = {
       VALUE10=VALUES(VALUE10),VALUE25=VALUES(VALUE25),
       CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log('대기질 예보통보 조회 데이터 수정 요청을 실패하였습니다.', err);
+      if (err) return log(`대기질 예보통보 조회 실패 (모든장비)`, err);
       log(
-        '대기질 예보통보 조회: 새로운 데이터 조회',
-        '대기질 예보통보 조회: 새로운 데이터 조회'
+        `대기질 예보통보 조회: 새로운 데이터 조회 (모든장비)`,
+        `대기질 예보통보 조회: 새로운 데이터 조회 (모든장비)`
       );
     });
   }

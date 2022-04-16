@@ -1,24 +1,23 @@
 const request = require('request');
-const config_api = require('../json/api.json');
-const { useQueryString, log, apiError, useNow } = require('../hook');
-const { nowDustCategoryList } = require('../json/static.json');
+const conf = require('../config.json').api.subject.nowDust;
+const { useQueryString, log, apiError, useNow, useDateFormat } = require('../hook');
 
 module.exports = {
   getNowDustSet () {
     db.query(`
-      SELECT DISTINCT b.STATION_NAME
+      SELECT DISTINCT a.ID, b.STATION_NAME
       FROM hardware_list a LEFT JOIN station_list b
       ON a.STATION_ID = b.ID
     `, (err, result) => {
       if (err) return console.log('위치 정보 조회 요청에 실패하였습니다.', err);
 
-      result.forEach(loc => this.getNowDust({ loc }));
+      result.forEach(loc => this.getNowDust({ loc }, loc.ID));
     });
   },
-  getNowDust ({ loc }) {
+  getNowDust ({ loc }, hardwareId) {
 
     let query = useQueryString({
-      ServiceKey: config_api.apiKey,
+      ServiceKey: conf.apiKey,
       pageNo: 1,
       numOfRows: 10000,
       returnType: 'json',
@@ -43,25 +42,25 @@ module.exports = {
     request(`http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty?${query}`,
       (err, result) => {
         if (err) return log('현재 미세먼지 데이터 요청에 실패하였습니다. (측정소: ' + loc.STATION_NAME + ')', err);
-        // log('현재 미세먼지 데이터 요청에 성공하였습니다. (측정소: ' + loc.STATION_NAME + ')');
         
-        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
+        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (nowDust)');
 
         let data = JSON.parse(result?.body)?.response?.body?.items;
         if (data) data = data[0] ?? null;
-        this.newNowDust({ data, loc });
+        this.newNowDust({ data, loc }, hardwareId);
       }
     );
   },
-  newNowDust ({ data, loc }) {
+  newNowDust ({ data, loc }, hardwareId) {
     let insertSQL = [];
     let updateSQL = [];
-
-    let [date, time] = data.dataTime.split(' ');
+    let dateTime = useDateFormat(new Date(data.dataTime));
+    
+    let [date, time] = dateTime.split(' ');
     date = date.replace(/-/g, '');
     time = time.replace(/:/g, '');
 
-    nowDustCategoryList.forEach(item => {
+    conf.category.forEach(item => {
       let find = data[item] ?? 'null';
       insertSQL.push('\'' + find + '\'');
       updateSQL.push(item + '=VALUES(' + item + ') ');
@@ -69,16 +68,16 @@ module.exports = {
 
     db.query(`
       INSERT INTO now_dust
-      (STATION,BASE_TM,BASE_DT,DATE_TIME,${nowDustCategoryList.join(',')},CHECK_DT)
+      (STATION,BASE_TM,BASE_DT,DATE_TIME,${conf.category.join(',')},CHECK_DT)
       VALUES
-      ('${loc?.STATION_NAME}','${time}','${date}','${data.dataTime}:00',${insertSQL.join(',')},'${useNow()}')
+      ('${loc?.STATION_NAME}','${time}','${date}','${dateTime}',${insertSQL.join(',')},'${useNow()}')
       ON DUPLICATE KEY UPDATE
       ${updateSQL.join(',')},BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log('현재 미세먼지 데이터 수정 요청을 실패하였습니다.', err);
+      if (err) return log(`현재 미세먼지 조회 실패 (장비: ${hardwareId})`, err);
       log(
-        '현재 미세먼지: 새로운 데이터 조회 (측정소=' + String(loc.STATION_NAME) + ')',
-        '현재 미세먼지: 새로운 데이터 조회 (측정소=' + String(loc.STATION_NAME) + ')'
+        `현재 미세먼지: 새로운 데이터 조회 (장비: ${hardwareId})`,
+        `현재 미세먼지: 새로운 데이터 조회 (장비: ${hardwareId})`
       );
     });
   }

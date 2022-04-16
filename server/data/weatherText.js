@@ -1,11 +1,11 @@
 const request = require('request');
-const config_api = require('../json/api.json');
+const conf = require('../config.json').api.subject.weatherText;
 const { useQueryString, log, apiError, useDateFormat, useNow } = require('../hook');
 
 module.exports = {
   getWeatherText() {
     let query = useQueryString({
-      ServiceKey: config_api.apiKey,
+      ServiceKey: conf.apiKey,
       pageNo: 1,
       numOfRows: 10000,
       dataType: 'JSON',
@@ -28,9 +28,7 @@ module.exports = {
     request(`http://apis.data.go.kr/1360000/VilageFcstMsgService/getWthrSituation?${query}`,
       (err, result) => {
         if (err) return log('기상개황조회 데이터 요청에 실패하였습니다.', err);
-        // log('기상개황조회 데이터 요청에 성공하였습니다.');
-
-        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
+        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (weatherText)');
 
         let data = JSON.parse(result?.body)?.response?.body?.items?.item[0];
         if (!data) return console.log('데이터를 가져오지 못했습니다.');
@@ -94,10 +92,10 @@ module.exports = {
       ON DUPLICATE KEY UPDATE
       TEXT=VALUES(TEXT),CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log('기상개황조회 데이터 수정 요청을 실패하였습니다.', err);
+      if (err) return log('기상개황조회 데이터 조회 실패 (모든장비)', err);
       log(
-        '기상개황조회: 새로운 데이터 조회',
-        '기상개황조회: 새로운 데이터 조회'
+        '기상개황조회: 새로운 데이터 조회 (모든장비)',
+        '기상개황조회: 새로운 데이터 조회 (모든장비)'
       );
     });
   }

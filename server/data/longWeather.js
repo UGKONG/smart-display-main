@@ -1,22 +1,21 @@
 const request = require('request');
-const config_api = require('../json/api.json');
+const conf = require('../config.json').api.subject.longWeather;
 const { useQueryString, log, apiError, useNow, useDateFormat } = require('../hook');
-const { longDustCategoryList, longWeatherGetTimeList } = require('../json/static.json');
 
 module.exports = {
   getLongWeatherSet(lastDataRequest) {
     db.query(`
-      SELECT DISTINCT b.CODE FROM
-      hardware_list a LEFT JOIN location_code_list b
-      ON a.AREA_CODE_ID = b.ID
+      SELECT DISTINCT a.ID, b.CODE FROM
+      hardware_list a LEFT JOIN area_list b
+      ON a.AREA_ID = b.ID
     `, (err, result) => {
-      if (err) return console.log('위치 정보 조회 요청에 실패하였습니다.', err);
+      if (err) return console.log(err);
 
       let dateTime = useNow({ hour: 0, format: false });
       let time = dateTime.split(' ')[1];
       time = time.slice(0, 2) + '00';
 
-      let isGetMinutes = longWeatherGetTimeList.indexOf(time);
+      let isGetMinutes = conf.time.indexOf(time);
       if (isGetMinutes > -1) {  // 현재 시간이 요청 시간일때
         [date] = useNow({ hour: lastDataRequest ? -12 : 0, format: false }).split(' ');
 
@@ -25,7 +24,7 @@ module.exports = {
         let _date = new Date();
         _date.setHours(0);_date.setMinutes(0);_date.setSeconds(0);
         
-        let getTimeList = [...longWeatherGetTimeList];
+        let getTimeList = [...conf.time];
         getTimeList.push(time);
         getTimeList = getTimeList.sort((x, y) => x - y);
         let getTimeIdx = getTimeList.indexOf(time);
@@ -43,14 +42,14 @@ module.exports = {
         date = y + m + d;
       }
     
-      result.forEach(item => this.getLongWeather({ areaCode: item.CODE, date, time }));
+      result.forEach(item => this.getLongWeather({ areaCode: item.CODE, date, time }, item.ID));
     });
 
   },
-  getLongWeather({ areaCode, date, time }) {
+  getLongWeather({ areaCode, date, time }, hardwareId) {
 
     let query = useQueryString({
-      serviceKey: config_api.apiKey,
+      serviceKey: conf.apiKey,
       pageNo: 1,
       numOfRows: 10000,
       dataType: 'JSON',
@@ -73,18 +72,17 @@ module.exports = {
     
     request(`http://apis.data.go.kr/1360000/MidFcstInfoService/getMidTa?${query}`,
       (err, result) => {
-        if (err) return log('중기기온조회 데이터 요청에 실패하였습니다. (측정소: ' + areaCode + ')', err);
-        log('중기기온조회 데이터 요청에 성공하였습니다.');
+        if (err) return console.log(err);
 
-        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다.');
+        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (longWeather)');
         
         let data = JSON.parse(result?.body)?.response?.body?.items?.item[0];
-        this.newLongWeather({ date, time, data, areaCode });
+        this.newLongWeather({ date, time, data, areaCode }, hardwareId);
       }
     )
     
   },
-  newLongWeather({ date, time, data, areaCode }) {
+  newLongWeather({ date, time, data, areaCode }, hardwareId) {
     let resultArr = [];
     let startDat = 3;
     let dayCount = parseInt(Object.keys(data).length / 6, 0);
@@ -117,10 +115,10 @@ module.exports = {
       BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),
       CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log('중기예보 조회 데이터 수정 요청을 실패하였습니다.', err);
+      if (err) return log(`중기예보 조회 실패 (장비: ${hardwareId})`, err);
       log(
-        '중기예보 조회: 새로운 데이터 조회',
-        '중기예보 조회: 새로운 데이터 조회'
+        `중기예보 조회: 새로운 데이터 조회 (장비: ${hardwareId})`,
+        `중기예보 조회: 새로운 데이터 조회 (장비: ${hardwareId})`
       );
     })
   }

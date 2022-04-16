@@ -1,5 +1,6 @@
 const { useNow, log } = require('./hook');
-const config_api = require('./json/api.json');
+const intervalTime = require('./config.json').api.get;
+const conf = require('./config.json').api.subject;
 const nowWeather = require('./data/nowWeather');
 const shortWeather = require('./data/shortWeather');
 const longWeather = require('./data/longWeather');
@@ -9,35 +10,35 @@ const shortDust = require('./data/shortDust');
 const longDetailDust = require('./data/longDetailDust');
 
 // 일정 시간마다 실행할 함수들
-function getFunctions (minutes, isAuto) {
+function getFunctions (now, isAuto) {
   if (isAuto) {
-    (minutes == config_api.nowWeatherGetMinutes) && nowWeather.getNowWeatherSet(minutes < config_api.nowWeatherGetMinutes);
-    (minutes == config_api.shortWeatherGetMinutes) && shortWeather.getShortWeatherSet(minutes < config_api.shortWeatherGetMinutes);
-    (minutes == config_api.longWeatherGetMinutes) && longWeather.getLongWeatherSet(minutes < config_api.longWeatherGetMinutes);
-    (minutes == config_api.nowDustGetMinutes) && nowDust.getNowDustSet();
-    (minutes == config_api.weatherTextGetMinutes) && weatherText.getWeatherText();
-    (minutes == config_api.shortDustGetMinutes) && shortDust.getShortDustSet(minutes < config_api.shortDustGetMinutes);
-    (minutes == config_api.longDetailDustGetMinutes) && longDetailDust.getLongDetailDustSet(minutes < config_api.longDetailDustGetMinutes);
+    (now == conf.nowWeather.get) && nowWeather.getNowWeatherSet(now < conf.nowWeather.get);
+    (now == conf.shortWeather.get) && shortWeather.getShortWeatherSet(now < conf.shortWeather.get);
+    (now == conf.longWeather.get) && longWeather.getLongWeatherSet(now < conf.longWeather.get);
+    (now == conf.nowDust.get) && nowDust.getNowDustSet();
+    (now == conf.weatherText.get) && weatherText.getWeatherText();
+    (now == conf.shortDust.get) && shortDust.getShortDustSet(now < conf.shortDust.get);
+    (now == conf.longDetailDust.get) && longDetailDust.getLongDetailDustSet(now < conf.longDetailDust.get);
   } else {
-    nowWeather.getNowWeatherSet(minutes < config_api.nowWeatherGetMinutes);
-    shortWeather.getShortWeatherSet(minutes < config_api.shortWeatherGetMinutes);
-    longWeather.getLongWeatherSet(minutes < config_api.longWeatherGetMinutes);
+    nowWeather.getNowWeatherSet(now < conf.nowWeather.get);
+    shortWeather.getShortWeatherSet(now < conf.shortWeather.get);
+    longWeather.getLongWeatherSet(now < conf.longWeather.get);
     nowDust.getNowDustSet();
     weatherText.getWeatherText();
-    shortDust.getShortDustSet(minutes < config_api.shortDustGetMinutes);
-    longDetailDust.getLongDetailDustSet(minutes < config_api.longDetailDustGetMinutes);
+    shortDust.getShortDustSet(now < conf.shortDust.get);
+    longDetailDust.getLongDetailDustSet(now < conf.longDetailDust.get);
   }
 }
 
 // Time Process
 function timeProcess () {
-  let minutes = new Date().getMinutes();
-  getFunctions(minutes, false);
+  let now = new Date().getMinutes();
+  getFunctions(now, false);
 
   setInterval(() => {
-    let minutes = new Date().getMinutes();
-    getFunctions(minutes, true);
-  }, 60000);
+    let now = new Date().getMinutes();
+    getFunctions(now, true);
+  }, intervalTime);
 }
 
 // 서버 시작 함수

@@ -12,6 +12,7 @@ export default function () {
     { id: 'nowDust', name: '실시간 미세먼지', value: '-' },
     { id: 'shortDust', name: '단기 미세먼지/초미세먼지 예보', value: '-' },
     { id: 'longDetailDust', name: '주간 초미세먼지 예보', value: '-' },
+    { id: 'weatherText', name: '동네예보 통보문', value: '-' }
   ]);
 
   const GET = () => {
