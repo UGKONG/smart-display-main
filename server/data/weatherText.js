@@ -60,15 +60,20 @@ module.exports = {
       if (item.indexOf('(오늘) ') > -1) {
         date.setDate(date.getDate() + 0);
         text = item.split('(오늘) ')[1];
+        console.log(text);
       } else if (item.indexOf('(내일) ') > -1) {
         date.setDate(date.getDate() + 1);
         text = item.split('(내일) ')[1];
       } else if (item.indexOf('(모레) ') > -1) {
         date.setDate(date.getDate() + 2);
         text = item.split('(모레) ')[1];
+      } else if (item.indexOf('(글피) ') > -1) {
+        date.setDate(date.getDate() + 3);
+        text = item.split('(글피) ')[1];
       } else {
         text = '';
       }
+
       date = useDateFormat(date);
       let [dt, tm] = date.split(' ');
       dt = dt.replace(/-/g, '');
@@ -83,7 +88,7 @@ module.exports = {
         ([item.time.slice(0, 2), ':', item.time.slice(2, 4), ':', item.time.slice(4, 6)]).join('');
       insertSQL.push(`('${dateTime}','${item.text}','${useNow()}')`);
     });
-
+    
     db.query(`
       INSERT INTO weather_text
       (DATE_TIME,TEXT,CHECK_DT)

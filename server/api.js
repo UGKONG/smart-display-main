@@ -232,21 +232,19 @@ module.exports.getData = (req, res) => {
 
   let now = new Date();
   let _now = new Date();
-  let data = {
-    now: [],
-    today: [],
-    tomorrow: [],
-    afterTomorrow: [],
-    week: [],
-    text: [],
-  }
+  let data = { now: {}, today: {}, tomorrow: {}, week: [], text: {} }
 
   // now 요청
   db.query(`
     SELECT
-    c.ID, b.NX, b.NY,
-    c.RN1, c.T1H, d.SKY, c.DATE_TIME AS WEATHER_DATE,
-    f.pm10Value, f.pm25Value, f.o3Value, f.DATE_TIME AS DUST_DATE
+    c.ID,
+    d.SKY, IF(d.SKY = 1, '맑음', IF(d.SKY = 3, '구름많음', IF(d.SKY = 4, '흐림', 'NULL'))) AS SKY_TEXT,
+    c.T1H AS TMP, CONCAT(CONVERT(c.T1H, CHAR), '℃') AS TMP_TEXT,
+    f.pm10Value AS PM10, CONCAT(CONVERT(f.pm10Value, CHAR), '㎍/㎥') AS PM10_TEXT,
+    f.pm25Value AS PM25, CONCAT(CONVERT(f.pm25Value, CHAR), '㎍/㎥') AS PM25_TEXT,
+    f.o3Value AS O3, CONCAT(CONVERT(f.o3Value, CHAR), 'ppm') AS O3_TEXT,
+    c.DATE_TIME AS WEATHER_DATE,
+    f.DATE_TIME AS DUST_DATE
     FROM hardware_list a
     LEFT JOIN location_list b ON a.LOCATION_ID = b.ID
     LEFT JOIN now_weather c ON b.NX = c.NX AND b.NY = c.NY
@@ -261,14 +259,15 @@ module.exports.getData = (req, res) => {
     if (err || result.length === 0) return res.send(data);
 
     // 오늘
-    data.now = result[0] ?? [];
+    data.now = result[0] ?? {};
 
     db.query(`
       SELECT
       sw.ID,
-      sw.SKY, sw.TMP, sw.POP,
-      sd.VALUE10, sd.VALUE25,
-      CONVERT(sw.DATE_TIME, CHAR(10)) AS DATE
+      sw.SKY, IF(sw.SKY = 1, '맑음', IF(sw.SKY = 3, '구름많음', IF(sw.SKY = 4, '흐림', 'NULL'))) AS SKY_TEXT, sw.TMP, sw.POP,
+      sd.VALUE10 AS PM10, sd.VALUE25 AS PM25,
+      CONVERT(sw.DATE_TIME, CHAR(10)) AS DATE,
+      sw.DATE_TIME
       FROM hardware_list hl
       LEFT JOIN location_list ll ON hl.LOCATION_ID = ll.ID
       LEFT JOIN short_weather sw ON ll.NX = sw.NX AND ll.NY = sw.NY
@@ -283,27 +282,48 @@ module.exports.getData = (req, res) => {
     `, (err, result) => {
       if (err) console.log(err);
       if (err || result.length === 0) return res.send(data);
-      
+
+      // 최저/최고 필터 함수
+      const filterMinMax = (arr) => {
+        let min = arr.filter(item => {
+          let calc = new Date(item.DATE + ' ' + '12:00:00') - new Date(item.DATE_TIME).getTime() > 0;
+          if (calc) return item;
+        }).sort((x, y) => x.TMP - y.TMP)[0];
+
+        let max = arr.filter(item => {
+          let calc = new Date(item.DATE + ' ' + '12:00:00') - new Date(item.DATE_TIME).getTime() <= 0;
+          if (calc) return item;
+        }).sort((x, y) => y.TMP - x.TMP)[0];
+
+        return { min, max };
+      }
+
       // 오늘
-      data.today = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? null;
+      let todayArr = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? [];
+      data.today = filterMinMax(todayArr);
       
       // 내일
       now.setDate(now.getDate() + 1);
-      data.tomorrow = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? null;
+      let tomorrowArr = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? [];
+      data.tomorrow = filterMinMax(tomorrowArr);
       
+      // 모레 날짜 셋팅
       _now.setDate(_now.getDate() + 2);
       let afterTomorrowDate = useDateFormat(_now, true);
 
       // 중기
       db.query(`
         SELECT
-        lw.ID,
-        lw.MIN, lw.MAX,
-        CONVERT(lw.DATE_TIME, CHAR(10)) AS DATE
+        lw1.ID,
+        lw1.MIN, lw1.MAX,
+        lw2.RAIN_AM, lw2.RAIN_PM,
+        lw2.SKY_AM, lw2.SKY_PM,
+        CONVERT(lw1.DATE_TIME, CHAR(10)) AS DATE
         FROM hardware_list hl
         LEFT JOIN area_list al ON hl.AREA_ID = al.ID
-        LEFT JOIN long_weather lw ON al.CODE = lw.AREA_CODE AND 
-        lw.DATE_TIME >= '${afterTomorrowDate} 00:00:00'
+        LEFT JOIN long_weather1 lw1 ON al.CODE1 = lw1.AREA_CODE AND 
+        lw1.DATE_TIME >= '${afterTomorrowDate} 00:00:00'
+        INNER JOIN long_weather2 lw2 ON al.CODE2 = lw2.AREA_CODE AND lw1.DATE_TIME = lw2.DATE_TIME
       `, (err, result) => {
         if (err) console.log(err);
         if (err || result.length === 0) return res.send(data);
@@ -311,9 +331,23 @@ module.exports.getData = (req, res) => {
         // 중기
         data.week = result;
 
-        res.send(data);
-      })
-
+        // 날씨 통보문
+        db.query(`
+          SELECT
+          ID,
+          TEXT,
+          DATE_TIME AS DATE
+          FROM weather_text
+          WHERE CONVERT(NOW(), DATE) <= CONVERT(DATE_TIME, DATE)
+          LIMIT 1
+        `, (err, result) => {
+          if (err) console.log(err);
+          if (err || result.length === 0) return res.send(data);
+          
+          data.text = result[0];
+          res.send(data);
+        });
+      });
     });
   });
 }

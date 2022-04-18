@@ -1,11 +1,11 @@
 const request = require('request');
-const conf = require('../config.json').api.subject.longWeather;
+const conf = require('../config.json').api.subject.longWeather1;
 const { useQueryString, log, apiError, useNow, useDateFormat } = require('../hook');
 
 module.exports = {
   getLongWeatherSet(lastDataRequest) {
     db.query(`
-      SELECT DISTINCT a.ID, b.CODE FROM
+      SELECT DISTINCT a.ID, b.CODE1 FROM
       hardware_list a LEFT JOIN area_list b
       ON a.AREA_ID = b.ID
     `, (err, result) => {
@@ -42,7 +42,7 @@ module.exports = {
         date = y + m + d;
       }
     
-      result.forEach(item => this.getLongWeather({ areaCode: item.CODE, date, time }, item.ID));
+      result.forEach(item => this.getLongWeather({ areaCode: item.CODE1, date, time }, item.ID));
     });
 
   },
@@ -74,27 +74,26 @@ module.exports = {
       (err, result) => {
         if (err) return console.log(err);
 
-        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (longWeather)');
+        if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (longWeather1)');
         
         let data = JSON.parse(result?.body)?.response?.body?.items?.item[0];
         this.newLongWeather({ date, time, data, areaCode }, hardwareId);
       }
     )
-    
   },
   newLongWeather({ date, time, data, areaCode }, hardwareId) {
     let resultArr = [];
-    let startDat = 3;
+    let startDate = 3;
     let dayCount = parseInt(Object.keys(data).length / 6, 0);
     let dateFormat = date.slice(0, 4) + '-' + date.slice(4, 6) + '-' + date.slice(6, 8);
     
-    for (let i = 0; i < dayCount; i ++) {
+    for (let i = 0; i < 5; i ++) {
       let _date = new Date(dateFormat);
       _date.setDate(_date.getDate() + i + 3);
       _date = useDateFormat(_date).split(' ')[0];
       
-      let min = data['taMin' + (i + startDat)];
-      let max = data['taMax' + (i + startDat)];
+      let min = data['taMin' + (i + startDate)];
+      let max = data['taMax' + (i + startDate)];
       let pushObj = { date: _date, min, max };
       resultArr.push(pushObj);
     }
@@ -106,7 +105,7 @@ module.exports = {
     });
 
     db.query(`
-      INSERT INTO long_weather
+      INSERT INTO long_weather1
       (AREA_CODE,DATE_TIME,MIN,MAX,BASE_TM,BASE_DT,CHECK_DT)
       VALUES
       ${insertSQL.join(',')}
@@ -115,10 +114,10 @@ module.exports = {
       BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),
       CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log(`중기예보 조회 실패 (장비: ${hardwareId})`, err);
+      if (err) return log(`중기예보(기온) 조회 실패 (장비: ${hardwareId})`, err);
       log(
-        `중기예보 조회: 새로운 데이터 조회 (장비: ${hardwareId})`,
-        `중기예보 조회: 새로운 데이터 조회 (장비: ${hardwareId})`
+        `중기예보(기온) 조회: 새로운 데이터 조회 (장비: ${hardwareId})`,
+        `중기예보(기온) 조회: 새로운 데이터 조회 (장비: ${hardwareId})`
       );
     })
   }
