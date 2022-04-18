@@ -8,7 +8,8 @@ export default function () {
   const [infoList, setInfoList] = React.useState([
     { id: 'nowWeather', name: '실시간 날씨', value: '-' },
     { id: 'shortWeather', name: '단기 날씨 예보', value: '-' },
-    { id: 'longWeather', name: '중기 날씨 예보', value: '-' },
+    { id: 'longWeather1', name: '중기 날씨(기온) 예보', value: '-' },
+    { id: 'longWeather2', name: '중기 날씨(하늘,강수량) 예보', value: '-' },
     { id: 'nowDust', name: '실시간 미세먼지', value: '-' },
     { id: 'shortDust', name: '단기 미세먼지/초미세먼지 예보', value: '-' },
     { id: 'longDetailDust', name: '주간 초미세먼지 예보', value: '-' },
