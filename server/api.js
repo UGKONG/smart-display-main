@@ -144,15 +144,10 @@ module.exports.isConnect = (req, res) => {
   let getInfo = {};
   getInfo.infoList = [];
   
-  const DT_FORMAT = (result = []) => {
-    let date;
-    let { DATE_TIME, CHECK_DT } = result[0];
-    return RESULT_TXT({ DATE_TIME, CHECK_DT });
-  }
-
-  const RESULT_TXT = ({ DATE_TIME, CHECK_DT }) => {
-    return `마지막 데이터: ${DATE_TIME} | 업데이트 시간: ${CHECK_DT}`;
-    
+  const DT_FORMAT = (resultData = []) => {
+    let { DATE_TIME, CHECK_DT } = resultData[0];
+    let result = `마지막 데이터: ${DATE_TIME} | 업데이트 시간: ${CHECK_DT}`;
+    return result;
   }
 
   db.query(`
@@ -164,43 +159,43 @@ module.exports.isConnect = (req, res) => {
     getInfo.infoList.push({ name: 'nowWeather', value: err ? '-' : DT });
 
     db.query(`
-      SELECT DATE_TIME,CHECK_DT FROM short_weather ORDER BY ID DESC LIMIT 1;
+      SELECT DATE_TIME,CHECK_DT FROM short_weather ORDER BY CHECK_DT DESC LIMIT 1;
     `, (err, result) => {
       DT = err ? '-' : DT_FORMAT(result);
       getInfo.infoList.push({ name: 'shortWeather', value: err ? '-' : DT });
 
       db.query(`
-        SELECT DATE_TIME,CHECK_DT FROM now_dust ORDER BY ID DESC LIMIT 1;
+        SELECT DATE_TIME,CHECK_DT FROM now_dust ORDER BY CHECK_DT DESC LIMIT 1;
       `, (err, result) => {
         DT = err ? '-' : DT_FORMAT(result);
         getInfo.infoList.push({ name: 'nowDust', value: err ? '-' : DT });
         
         db.query(`
-          SELECT DATE_TIME,CHECK_DT FROM short_dust ORDER BY ID DESC LIMIT 1;
+          SELECT DATE_TIME,CHECK_DT FROM short_dust ORDER BY CHECK_DT DESC LIMIT 1;
         `, (err, result) => {
           DT = err ? '-' : DT_FORMAT(result);
           getInfo.infoList.push({ name: 'shortDust', value: err ? '-' : DT });
           
           db.query(`
-            SELECT DATE_TIME,CHECK_DT FROM long_weather1 ORDER BY ID DESC LIMIT 1;
+            SELECT DATE_TIME,CHECK_DT FROM long_weather1 ORDER BY CHECK_DT DESC LIMIT 1;
           `, (err, result) => {
             DT = err ? '-' : DT_FORMAT(result);
             getInfo.infoList.push({ name: 'longWeather1', value: err ? '-' : DT });
 
             db.query(`
-              SELECT DATE_TIME,CHECK_DT FROM long_weather2 ORDER BY ID DESC LIMIT 1;
+              SELECT DATE_TIME,CHECK_DT FROM long_weather2 ORDER BY CHECK_DT DESC LIMIT 1;
             `, (err, result) => {
               DT = err ? '-' : DT_FORMAT(result);
               getInfo.infoList.push({ name: 'longWeather2', value: err ? '-' : DT });
             
               db.query(`
-                SELECT DATE_TIME,CHECK_DT FROM long_detail_dust ORDER BY ID DESC LIMIT 1;
+                SELECT DATE_TIME,CHECK_DT FROM long_detail_dust ORDER BY CHECK_DT DESC LIMIT 1;
               `, (err, result) => {
                 DT = err ? '-' : DT_FORMAT(result);
                 getInfo.infoList.push({ name: 'longDetailDust', value: err ? '-' : DT });
               
                 db.query(`
-                  SELECT DATE_TIME,CHECK_DT FROM weather_text ORDER BY ID DESC LIMIT 1;
+                  SELECT DATE_TIME,CHECK_DT FROM weather_text ORDER BY CHECK_DT DESC LIMIT 1;
                 `, (err, result) => {
                   DT = err ? '-' : DT_FORMAT(result);
                   getInfo.infoList.push({ name: 'weatherText', value: err ? '-' : DT });
