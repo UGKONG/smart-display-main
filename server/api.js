@@ -405,7 +405,7 @@ module.exports.getData = (req, res) => {
             if (err || result.length === 0) return res.send(data);
             
             data.text = result[0];
-            res.send(data.week);
+            res.send(data);
           });
         });
       });
