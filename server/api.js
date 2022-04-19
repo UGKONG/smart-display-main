@@ -245,7 +245,7 @@ module.exports.getData = (req, res) => {
     LEFT JOIN location_list ll ON hl.LOCATION_ID = ll.ID
     LEFT JOIN station_list sl ON hl.STATION_ID = sl.ID
     LEFT JOIN area_list al ON hl.AREA_ID = al.ID
-    WHERE hl.ID = ${id}
+    WHERE hl.ID = '${id}'
   `, (err, result) => {
     if (err || result?.length === 0) return res.send(fail('해당 ID와 일치하는 장비가 없습니다.'));
     let HW = result[0];
@@ -295,7 +295,7 @@ module.exports.getData = (req, res) => {
       LEFT JOIN short_weather d ON c.DATE_TIME = d.DATE_TIME
       LEFT JOIN station_list e ON a.STATION_ID = e.ID
       LEFT JOIN now_dust f ON e.STATION_NAME = f.STATION
-      WHERE a.ID = ${id}
+      WHERE a.ID = '${id}'
       ORDER BY c.DATE_TIME desc, f.DATE_TIME desc
       LIMIT 1
     `, (err, result) => {
@@ -358,7 +358,7 @@ module.exports.getData = (req, res) => {
         // 중기
         db.query(`
           SELECT
-          lw1.ID,
+          hl.ID,
           lw1.MIN, lw1.MAX,
           lw2.RAIN_AM, lw2.RAIN_PM,
           lw2.SKY_AM, lw2.SKY_PM,
@@ -368,6 +368,7 @@ module.exports.getData = (req, res) => {
           LEFT JOIN long_weather1 lw1 ON al.CODE1 = lw1.AREA_CODE AND 
           lw1.DATE_TIME >= '${afterTomorrowDate} 00:00:00'
           INNER JOIN long_weather2 lw2 ON al.CODE2 = lw2.AREA_CODE AND lw1.DATE_TIME = lw2.DATE_TIME
+          WHERE hl.ID = '${id}'
         `, (err, result) => {
           if (err) console.log(err);
           if (err || result.length === 0) return res.send(data);
@@ -394,9 +395,5 @@ module.exports.getData = (req, res) => {
         });
       });
     });
-
-
   });
-
-  
 }
