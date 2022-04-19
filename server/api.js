@@ -359,9 +359,22 @@ module.exports.getData = (req, res) => {
         db.query(`
           SELECT
           hl.ID,
+          IF(lw2.SKY_PM = '맑음', '1', 
+          IF(lw2.SKY_PM = '구름많음', '3', 
+          IF(lw2.SKY_PM = '구름많고 비', '3', 
+          IF(lw2.SKY_PM = '구름많고 눈', '3', 
+          IF(lw2.SKY_PM = '구름많고 비/눈', '3', 
+          IF(lw2.SKY_PM = '구름많고 소나기', '3', 
+          IF(lw2.SKY_PM = '흐림', '4', 
+          IF(lw2.SKY_PM = '흐리고 비', '4', 
+          IF(lw2.SKY_PM = '흐리고 눈', '4', 
+          IF(lw2.SKY_PM = '흐리고 비/눈', '4', 
+          IF(lw2.SKY_PM = '흐리고 소나기', '4', 
+          'NULL'
+          ))))))))))) AS SKY,
+          lw2.SKY_PM AS SKY_TEXT,
           lw1.MIN, lw1.MAX,
-          lw2.RAIN_AM, lw2.RAIN_PM,
-          lw2.SKY_AM, lw2.SKY_PM,
+          lw2.RAIN_PM AS RAIN,
           CONVERT(lw1.DATE_TIME, CHAR(10)) AS DATE
           FROM hardware_list hl
           LEFT JOIN area_list al ON hl.AREA_ID = al.ID
@@ -369,6 +382,8 @@ module.exports.getData = (req, res) => {
           lw1.DATE_TIME >= '${afterTomorrowDate} 00:00:00'
           INNER JOIN long_weather2 lw2 ON al.CODE2 = lw2.AREA_CODE AND lw1.DATE_TIME = lw2.DATE_TIME
           WHERE hl.ID = '${id}'
+          ORDER BY lw1.DATE_TIME ASC
+          LIMIT 4;
         `, (err, result) => {
           if (err) console.log(err);
           if (err || result.length === 0) return res.send(data);
@@ -390,7 +405,7 @@ module.exports.getData = (req, res) => {
             if (err || result.length === 0) return res.send(data);
             
             data.text = result[0];
-            res.send(data);
+            res.send(data.week);
           });
         });
       });

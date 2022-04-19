@@ -60,7 +60,6 @@ module.exports = {
       if (item.indexOf('(오늘) ') > -1) {
         date.setDate(date.getDate() + 0);
         text = item.split('(오늘) ')[1];
-        console.log(text);
       } else if (item.indexOf('(내일) ') > -1) {
         date.setDate(date.getDate() + 1);
         text = item.split('(내일) ')[1];
