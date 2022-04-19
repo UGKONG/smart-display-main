@@ -11,11 +11,11 @@ module.exports = {
 
     db.query(`
       SELECT DISTINCT a.ID, b.NX, b.NY FROM 
-      hardware_list AS a LEFT JOIN location_list AS b 
-      ON a.LOCATION_ID = b.ID
+      hardware_list AS a 
+      LEFT JOIN location_list AS b ON a.LOCATION_ID = b.ID
     `, (err, result) => {
       if (err) return log('위치 정보 조회 요청에 실패하였습니다.', err);
-    
+      
       result.forEach(loc => this.getNowWeather({ date, time, loc }, loc.ID));
     });
   },

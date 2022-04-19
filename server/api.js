@@ -1,5 +1,6 @@
 // 클라이언트
-const requestIp = require('request-ip');
+const { address } = require('ip');
+const { getClientIp } = require('request-ip');
 const { db } = require('../web');
 const { log, fail, useDateFormat } = require('./hook');
 
@@ -37,7 +38,7 @@ module.exports.addDevice = (req, res) => {
   let areaValue = query.areaValue;
   let agentValue = query.agentValue;
   let memoValue = query.memoValue;
-  let ip = requestIp.getClientIp(req);
+  let ip = getClientIp(req);
 
   db.query(`
     INSERT INTO hardware_list
@@ -65,7 +66,7 @@ module.exports.modifyDevice = (req, res) => {
   let areaValue = query.areaValue;
   let agentValue = query.agentValue;
   let memoValue = query.memoValue;
-  let ip = requestIp.getClientIp(req);
+  let ip = getClientIp(req);
 
   db.query(`
     UPDATE hardware_list SET
@@ -136,7 +137,7 @@ module.exports.getArea = (req, res) => {
 
 // 404 페이지를 찾을 수 없습니다.
 module.exports.pageNotFound = (req, res) => {
-  res.send(fail('Page Not Found'));
+  res.send(fail('페이지를 찾을 수 없습니다.'));
 }
 
 // DB 연결상태 확인
@@ -151,51 +152,51 @@ module.exports.isConnect = (req, res) => {
   }
 
   db.query(`
-    SELECT DATE_TIME,CHECK_DT FROM now_weather ORDER BY ID DESC LIMIT 1;
+    SELECT DATE_TIME,CHECK_DT FROM now_weather ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
   `, (err, result) => {
     let DT = err ? '-' : DT_FORMAT(result);
-    getInfo.ip = requestIp.getClientIp(req);
+    getInfo.ip = getClientIp(req);
     getInfo.result = err ? false : true;
     getInfo.infoList.push({ name: 'nowWeather', value: err ? '-' : DT });
 
     db.query(`
-      SELECT DATE_TIME,CHECK_DT FROM short_weather ORDER BY CHECK_DT DESC LIMIT 1;
+      SELECT DATE_TIME,CHECK_DT FROM short_weather ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
     `, (err, result) => {
       DT = err ? '-' : DT_FORMAT(result);
       getInfo.infoList.push({ name: 'shortWeather', value: err ? '-' : DT });
 
       db.query(`
-        SELECT DATE_TIME,CHECK_DT FROM now_dust ORDER BY CHECK_DT DESC LIMIT 1;
+        SELECT DATE_TIME,CHECK_DT FROM now_dust ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
       `, (err, result) => {
         DT = err ? '-' : DT_FORMAT(result);
         getInfo.infoList.push({ name: 'nowDust', value: err ? '-' : DT });
         
         db.query(`
-          SELECT DATE_TIME,CHECK_DT FROM short_dust ORDER BY CHECK_DT DESC LIMIT 1;
+          SELECT DATE_TIME,CHECK_DT FROM short_dust ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
         `, (err, result) => {
           DT = err ? '-' : DT_FORMAT(result);
           getInfo.infoList.push({ name: 'shortDust', value: err ? '-' : DT });
           
           db.query(`
-            SELECT DATE_TIME,CHECK_DT FROM long_weather1 ORDER BY CHECK_DT DESC LIMIT 1;
+            SELECT DATE_TIME,CHECK_DT FROM long_weather1 ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
           `, (err, result) => {
             DT = err ? '-' : DT_FORMAT(result);
             getInfo.infoList.push({ name: 'longWeather1', value: err ? '-' : DT });
 
             db.query(`
-              SELECT DATE_TIME,CHECK_DT FROM long_weather2 ORDER BY CHECK_DT DESC LIMIT 1;
+              SELECT DATE_TIME,CHECK_DT FROM long_weather2 ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
             `, (err, result) => {
               DT = err ? '-' : DT_FORMAT(result);
               getInfo.infoList.push({ name: 'longWeather2', value: err ? '-' : DT });
             
               db.query(`
-                SELECT DATE_TIME,CHECK_DT FROM long_detail_dust ORDER BY CHECK_DT DESC LIMIT 1;
+                SELECT DATE_TIME,CHECK_DT FROM long_detail_dust ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
               `, (err, result) => {
                 DT = err ? '-' : DT_FORMAT(result);
                 getInfo.infoList.push({ name: 'longDetailDust', value: err ? '-' : DT });
               
                 db.query(`
-                  SELECT DATE_TIME,CHECK_DT FROM weather_text ORDER BY CHECK_DT DESC LIMIT 1;
+                  SELECT DATE_TIME,CHECK_DT FROM weather_text ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
                 `, (err, result) => {
                   DT = err ? '-' : DT_FORMAT(result);
                   getInfo.infoList.push({ name: 'weatherText', value: err ? '-' : DT });
@@ -219,7 +220,7 @@ module.exports.getLog = (req, res) => {
   db.query(`
     SELECT
     a.ID, a.IP, a.DESCRIPTION, DATE_FORMAT(a.DATE_TIME, '%Y-%m-%d %H:%i:%S') AS DATE_TIME
-    FROM log a ORDER BY ID DESC LIMIT 1000
+    FROM log a ORDER BY ID DESC LIMIT 500
   `, (err, result) => {
     if (err) return log('log 리스트 조회에 실패하였습니다.', err);
     res.send(result);
@@ -229,15 +230,53 @@ module.exports.getLog = (req, res) => {
 // 스마트 가로등 클라이언트에서 요청
 module.exports.getData = (req, res) => {
   let id = req.query?.id;
-
   if (!id) return res.send(fail('장비 ID가 없습니다.'));
-
   let now = new Date();
   let _now = new Date();
-  let data = { now: {}, today: {}, tomorrow: {}, week: [], text: {} }
+  let data = { info: {}, now: {}, today: {}, tomorrow: {}, week: [], text: {} }
 
-  db.query(`SELECT COUNT(*) AS COUNT FROM hardware_list WHERE ID = ${id}`, (err, result) => {
-    if (err || !result[0]?.COUNT) return res.send(fail('해당 ID와 일치하는 장비가 없습니다.'));
+  db.query(`
+    SELECT 
+    hl.ID, hl.NAME, hl.AGENT, hl.DESCRIPTION, 
+    ll.NX, ll.NY, hl.LOCATION_ID, ll.PATH1, ll.PATH2, ll.PATH3,
+    hl.STATION_ID, sl.SIDO_NAME, sl.STATION_NAME,
+    hl.AREA_ID, al.AREA, al.CITY, al.CODE1, al.CODE2
+    FROM hardware_list hl
+    LEFT JOIN location_list ll ON hl.LOCATION_ID = ll.ID
+    LEFT JOIN station_list sl ON hl.STATION_ID = sl.ID
+    LEFT JOIN area_list al ON hl.AREA_ID = al.ID
+    WHERE hl.ID = ${id}
+  `, (err, result) => {
+    if (err || result?.length === 0) return res.send(fail('해당 ID와 일치하는 장비가 없습니다.'));
+    let HW = result[0];
+
+    data.info = {
+      ID: HW.ID,
+      NAME: HW.NAME,
+      AGENT: HW.AGENT,
+      DESCRIPTION: HW.DESCRIPTION,
+      LOCATION: {
+        ID: HW.LOCATION_ID,
+        PATH1: HW.PATH1,
+        PATH2: HW.PATH2,
+        PATH3: HW.PATH3,
+      },
+      STATION: {
+        ID: HW.STATION_ID,
+        SIDO_NAME: HW.SIDO_NAME,
+        STATION_NAME: HW.STATION_NAME,
+      },
+      AREA: {
+        ID: HW.AREA_ID,
+        AREA: HW.AREA,
+        CITY: HW.CITY,
+        CODE1: HW.CODE1,
+        CODE2: HW.CODE2,
+      },
+      NOW: useDateFormat(new Date()),
+      IP1: getClientIp(req),
+      IP2: address()
+    };
 
     // now 요청
     db.query(`

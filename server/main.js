@@ -9,7 +9,6 @@ const nowDust = require('./data/nowDust');
 const weatherText = require('./data/weatherText');
 const shortDust = require('./data/shortDust');
 const longDetailDust = require('./data/longDetailDust');
-const request = require('request');
 
 // 일정 시간마다 실행할 함수들
 function getFunctions (now, isAuto) {
