@@ -72,6 +72,7 @@ module.exports = {
     let insertSQL = [];
 
     resultArr.forEach(item => {
+      item.value = item.value === '낮음' ? 1 : item.value === '보통' ? 2 : item.value === '높음' ? 3 : '매우나쁨';
       insertSQL.push(`('${item.date} 00:00:00','${item.location}','${item.baseDate}','${item.value}','${useNow()}')`);
     });
     

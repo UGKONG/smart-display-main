@@ -104,6 +104,8 @@ module.exports = {
     let insertSQL = [];
 
     resultArr.forEach(item => {
+      item.skyAM = item.skyAM === '맑음' ? 1 : (item.skyAM === '구름많음' || item.skyAM === '구름많고 비' || item.skyAM === '구름많고 눈' || item.skyAM === '구름많고 비/눈' || item.skyAM === '구름많고 소나기') ? 3 : 4;
+      item.skyPM = item.skyPM === '맑음' ? 1 : (item.skyPM === '구름많음' || item.skyPM === '구름많고 비' || item.skyPM === '구름많고 눈' || item.skyPM === '구름많고 비/눈' || item.skyPM === '구름많고 소나기') ? 3 : 4;
       insertSQL.push(`('${areaCode}','${item.date} 00:00:00',${item.rainAM},${item.rainPM},'${item.skyAM}','${item.skyPM}','${time}','${date}','${useNow()}')`);
     });
 

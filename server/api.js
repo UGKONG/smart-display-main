@@ -282,12 +282,12 @@ module.exports.getData = (req, res) => {
     db.query(`
       SELECT
       c.ID,
-      d.SKY, IF(d.SKY = 1, '맑음', IF(d.SKY = 3, '구름많음', IF(d.SKY = 4, '흐림', 'NULL'))) AS SKY_TEXT,
+      d.SKY, g.TEXT AS SKY_TEXT,
       c.T1H AS TMP, CONCAT(CONVERT(c.T1H, CHAR), '℃') AS TMP_TEXT,
       f.pm10Value AS PM10, 
-      IF(f.pm10Grade = 1, '좋음', IF(f.pm10Grade = 2, '보통', IF(f.pm10Grade = 3, '나쁨', '매우나쁨'))) AS PM10_TEXT,
+      h.TEXT AS PM10_TEXT,
       f.pm25Value AS PM25, 
-      IF(f.pm25Grade = 1, '좋음', IF(f.pm25Grade = 2, '보통', IF(f.pm25Grade = 3, '나쁨', '매우나쁨'))) AS PM25_TEXT,
+      i.TEXT AS PM25_TEXT,
       f.o3Value AS O3, CONCAT(CONVERT(f.o3Value, CHAR), 'ppm') AS O3_TEXT,
       c.DATE_TIME AS WEATHER_DATE,
       f.DATE_TIME AS DUST_DATE
@@ -297,6 +297,9 @@ module.exports.getData = (req, res) => {
       LEFT JOIN short_weather d ON c.DATE_TIME = d.DATE_TIME
       LEFT JOIN station_list e ON a.STATION_ID = e.ID
       LEFT JOIN now_dust f ON e.STATION_NAME = f.STATION
+      LEFT JOIN common g ON d.SKY = g.CODE AND g.CURRENT = 2
+      LEFT JOIN common h ON f.pm10Grade = h.CODE AND h.CURRENT = 1
+      LEFT JOIN common i ON f.pm25Grade = i.CODE AND i.CURRENT = 1
       WHERE a.ID = '${id}'
       ORDER BY c.DATE_TIME desc, f.DATE_TIME desc
       LIMIT 1
@@ -310,8 +313,12 @@ module.exports.getData = (req, res) => {
       db.query(`
         SELECT
         sw.ID,
-        sw.SKY, IF(sw.SKY = 1, '맑음', IF(sw.SKY = 3, '구름많음', IF(sw.SKY = 4, '흐림', 'NULL'))) AS SKY_TEXT, sw.TMP, sw.POP,
-        sd.VALUE10 AS PM10, sd.VALUE25 AS PM25,
+        sw.SKY, c1.TEXT AS SKY_TEXT, 
+        sw.TMP, sw.POP,
+        sd.VALUE10 AS PM10,
+        c2.TEXT AS PM10_TEXT,  
+        sd.VALUE25 AS PM25,
+        c3.TEXT AS PM25_TEXT, 
         CONVERT(sw.DATE_TIME, CHAR(10)) AS DATE,
         sw.DATE_TIME
         FROM hardware_list hl
@@ -320,6 +327,9 @@ module.exports.getData = (req, res) => {
         LEFT JOIN area_list al ON hl.AREA_ID = al.ID
         LEFT JOIN station_list sl ON hl.STATION_ID = sl.ID
         LEFT JOIN short_dust sd ON sl.SIDO_NAME = sd.LOCATION
+        LEFT JOIN common c1 ON sw.SKY = c1.CODE AND c1.CURRENT = 2
+        LEFT JOIN common c2 ON sd.VALUE10 = c2.CODE AND c2.CURRENT = 1
+        LEFT JOIN common c3 ON sd.VALUE25 = c3.CODE AND c3.CURRENT = 1
         WHERE hl.ID = '${id}' AND 
         CONVERT(sw.DATE_TIME, DATE) >= CONVERT(NOW(), DATE) AND
         CONVERT(sd.DATE_TIME, DATE) >= CONVERT(NOW(), DATE) AND
@@ -361,20 +371,8 @@ module.exports.getData = (req, res) => {
         db.query(`
           SELECT
           hl.ID,
-          IF(lw2.SKY_PM = '맑음', '1', 
-          IF(lw2.SKY_PM = '구름많음', '3', 
-          IF(lw2.SKY_PM = '구름많고 비', '3', 
-          IF(lw2.SKY_PM = '구름많고 눈', '3', 
-          IF(lw2.SKY_PM = '구름많고 비/눈', '3', 
-          IF(lw2.SKY_PM = '구름많고 소나기', '3', 
-          IF(lw2.SKY_PM = '흐림', '4', 
-          IF(lw2.SKY_PM = '흐리고 비', '4', 
-          IF(lw2.SKY_PM = '흐리고 눈', '4', 
-          IF(lw2.SKY_PM = '흐리고 비/눈', '4', 
-          IF(lw2.SKY_PM = '흐리고 소나기', '4', 
-          'NULL'
-          ))))))))))) AS SKY,
-          lw2.SKY_PM AS SKY_TEXT,
+          lw2.SKY_PM AS SKY,
+          c.TEXT AS SKY_TEXT,
           lw1.MIN, lw1.MAX,
           lw2.RAIN_PM AS RAIN,
           CONVERT(lw1.DATE_TIME, CHAR(10)) AS DATE
@@ -383,6 +381,7 @@ module.exports.getData = (req, res) => {
           LEFT JOIN long_weather1 lw1 ON al.CODE1 = lw1.AREA_CODE AND 
           lw1.DATE_TIME >= '${afterTomorrowDate} 00:00:00'
           INNER JOIN long_weather2 lw2 ON al.CODE2 = lw2.AREA_CODE AND lw1.DATE_TIME = lw2.DATE_TIME
+          LEFT JOIN common c ON lw2.SKY_PM = c.CODE AND c.CURRENT = 2
           WHERE hl.ID = '${id}'
           ORDER BY lw1.DATE_TIME ASC
           LIMIT 4;

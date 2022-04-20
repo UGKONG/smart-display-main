@@ -98,6 +98,8 @@ module.exports = {
     resultArr.forEach(item => {
       if (item.location === '경기북부' || item.location === '경기남부') item.location = '경기';
       if (item.location === '영동' || item.location === '영서') item.location = '강원';
+      item.value10 = item.value10 === '좋음' ? 1 : item.value10 === '보통' ? 2 : item.value10 === '나쁨' ? 3 : 4;
+      item.value25 = item.value25 === '좋음' ? 1 : item.value25 === '보통' ? 2 : item.value25 === '나쁨' ? 3 : 4;
       
       insertSQL.push(`('${item.date} 00:00:00','${item.location}','${item.baseDate}','${item.baseTime}','${item.value10}','${item.value25}','${useNow()}')`);
     });
