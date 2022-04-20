@@ -284,8 +284,10 @@ module.exports.getData = (req, res) => {
       c.ID,
       d.SKY, IF(d.SKY = 1, '맑음', IF(d.SKY = 3, '구름많음', IF(d.SKY = 4, '흐림', 'NULL'))) AS SKY_TEXT,
       c.T1H AS TMP, CONCAT(CONVERT(c.T1H, CHAR), '℃') AS TMP_TEXT,
-      f.pm10Value AS PM10, CONCAT(CONVERT(f.pm10Value, CHAR), '㎍/㎥') AS PM10_TEXT,
-      f.pm25Value AS PM25, CONCAT(CONVERT(f.pm25Value, CHAR), '㎍/㎥') AS PM25_TEXT,
+      f.pm10Value AS PM10, 
+      IF(f.pm10Grade = 1, '좋음', IF(f.pm10Grade = 2, '보통', IF(f.pm10Grade = 3, '나쁨', '매우나쁨'))) AS PM10_TEXT,
+      f.pm25Value AS PM25, 
+      IF(f.pm25Grade = 1, '좋음', IF(f.pm25Grade = 2, '보통', IF(f.pm25Grade = 3, '나쁨', '매우나쁨'))) AS PM25_TEXT,
       f.o3Value AS O3, CONCAT(CONVERT(f.o3Value, CHAR), 'ppm') AS O3_TEXT,
       c.DATE_TIME AS WEATHER_DATE,
       f.DATE_TIME AS DUST_DATE
