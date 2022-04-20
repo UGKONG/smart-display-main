@@ -96,10 +96,10 @@ module.exports = {
       ON DUPLICATE KEY UPDATE
       TEXT=VALUES(TEXT),CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log('기상개황조회 데이터 조회 실패 (모든장비)', err);
+      if (err) return log('기상개황조회 데이터 조회 실패', err);
       log(
-        '기상개황조회: 새로운 데이터 조회 (모든장비)',
-        '기상개황조회: 새로운 데이터 조회 (모든장비)'
+        '기상개황조회: 새로운 데이터 조회',
+        '기상개황조회: 새로운 데이터 조회'
       );
     });
   }

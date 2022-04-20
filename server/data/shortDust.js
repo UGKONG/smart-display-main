@@ -112,10 +112,10 @@ module.exports = {
       VALUE10=VALUES(VALUE10),VALUE25=VALUES(VALUE25),
       CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log(`대기질 예보통보 조회 실패 (모든장비)`, err);
+      if (err) return log(`대기질 예보통보 조회 실패`, err);
       log(
-        `대기질 예보통보 조회: 새로운 데이터 조회 (모든장비)`,
-        `대기질 예보통보 조회: 새로운 데이터 조회 (모든장비)`
+        `대기질 예보통보 조회: 새로운 데이터 조회`,
+        `대기질 예보통보 조회: 새로운 데이터 조회`
       );
     });
   }

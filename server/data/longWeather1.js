@@ -5,7 +5,7 @@ const { useQueryString, log, apiError, useNow, useDateFormat } = require('../hoo
 module.exports = {
   getLongWeatherSet(lastDataRequest) {
     db.query(`
-      SELECT DISTINCT a.ID, b.CODE1 FROM
+      SELECT DISTINCT b.CODE1 FROM
       hardware_list a LEFT JOIN area_list b
       ON a.AREA_ID = b.ID
     `, (err, result) => {
@@ -42,11 +42,11 @@ module.exports = {
         date = y + m + d;
       }
     
-      result.forEach(item => this.getLongWeather({ areaCode: item.CODE1, date, time }, item.ID));
+      result.forEach(item => this.getLongWeather({ areaCode: item.CODE1, date, time }));
     });
 
   },
-  getLongWeather({ areaCode, date, time }, hardwareId) {
+  getLongWeather({ areaCode, date, time }) {
 
     let query = useQueryString({
       serviceKey: conf.apiKey,
@@ -77,11 +77,11 @@ module.exports = {
         if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (longWeather1)');
         
         let data = JSON.parse(result?.body)?.response?.body?.items?.item[0];
-        this.newLongWeather({ date, time, data, areaCode }, hardwareId);
+        this.newLongWeather({ date, time, data, areaCode });
       }
     )
   },
-  newLongWeather({ date, time, data, areaCode }, hardwareId) {
+  newLongWeather({ date, time, data, areaCode }) {
     let resultArr = [];
     let startDate = 3;
     let dayCount = parseInt(Object.keys(data).length / 6, 0);
@@ -114,10 +114,10 @@ module.exports = {
       BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),
       CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log(`중기예보(기온) 조회 실패 (장비: ${hardwareId})`, err);
+      if (err) return log(`중기예보(기온) 조회 실패`, err);
       log(
-        `중기예보(기온) 조회: 새로운 데이터 조회 (장비: ${hardwareId})`,
-        `중기예보(기온) 조회: 새로운 데이터 조회 (장비: ${hardwareId})`
+        `중기예보(기온) 조회: 새로운 데이터 조회`,
+        `중기예보(기온) 조회: 새로운 데이터 조회`
       );
     })
   }

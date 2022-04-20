@@ -5,7 +5,7 @@ const { useQueryString, log, apiError, useNow, useDateFormat } = require('../hoo
 module.exports = {
   getNowDustSet () {
     db.query(`
-      SELECT DISTINCT a.ID, b.STATION_NAME
+      SELECT DISTINCT b.STATION_NAME
       FROM hardware_list a LEFT JOIN station_list b
       ON a.STATION_ID = b.ID
     `, (err, result) => {
@@ -47,11 +47,11 @@ module.exports = {
 
         let data = JSON.parse(result?.body)?.response?.body?.items;
         if (data) data = data[0] ?? null;
-        this.newNowDust({ data, loc }, hardwareId);
+        this.newNowDust({ data, loc });
       }
     );
   },
-  newNowDust ({ data, loc }, hardwareId) {
+  newNowDust ({ data, loc }) {
     let insertSQL = [];
     let updateSQL = [];
     let dateTime = useDateFormat(new Date(data.dataTime));
@@ -74,10 +74,10 @@ module.exports = {
       ON DUPLICATE KEY UPDATE
       ${updateSQL.join(',')},BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log(`현재 미세먼지 조회 실패 (장비: ${hardwareId})`, err);
+      if (err) return log(`현재 미세먼지 조회 실패`, err);
       log(
-        `현재 미세먼지: 새로운 데이터 조회 (장비: ${hardwareId})`,
-        `현재 미세먼지: 새로운 데이터 조회 (장비: ${hardwareId})`
+        `현재 미세먼지: 새로운 데이터 조회`,
+        `현재 미세먼지: 새로운 데이터 조회`
       );
     });
   }

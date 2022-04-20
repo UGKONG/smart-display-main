@@ -10,16 +10,16 @@ module.exports = {
     time = time + '00';
 
     db.query(`
-      SELECT DISTINCT a.ID, b.NX, b.NY FROM 
+      SELECT DISTINCT b.NX, b.NY FROM 
       hardware_list AS a 
       LEFT JOIN location_list AS b ON a.LOCATION_ID = b.ID
     `, (err, result) => {
       if (err) return log('위치 정보 조회 요청에 실패하였습니다.', err);
       
-      result.forEach(loc => this.getNowWeather({ date, time, loc }, loc.ID));
+      result.forEach(loc => this.getNowWeather({ date, time, loc }));
     });
   },
-  getNowWeather ({ date, time, loc }, hardwareId) {
+  getNowWeather ({ date, time, loc }) {
 
     let query = useQueryString({
       ServiceKey: conf.apiKey,
@@ -52,11 +52,11 @@ module.exports = {
         if (!validation(result)) return console.log('데이터를 가져오지 못했습니다. (nowWeather)');
 
         let data = JSON.parse(result?.body)?.response?.body?.items?.item;
-        this.newNowWeather({ data, loc, date, time }, hardwareId);
+        this.newNowWeather({ data, loc, date, time });
       }
     );
   },
-  newNowWeather ({ data, loc, date, time }, hardwareId) {
+  newNowWeather ({ data, loc, date, time }) {
 
     let insertSQL = [];
     let updateSQL = [];
@@ -79,10 +79,10 @@ module.exports = {
       ON DUPLICATE KEY UPDATE
       ${updateSQL.join(',')},CHECK_DT=VALUES(CHECK_DT)
     `, (err, result) => {
-      if (err) return log(`초단기실황 데이터 조회 실패 (장비: ${hardwareId}`, err);
+      if (err) return log(`초단기실황 데이터 조회 실패`, err);
       log(
-        `초단기실황: 새로운 데이터 조회 (장비: ${hardwareId})`,
-        `초단기실황: 새로운 데이터 조회 (장비: ${hardwareId})`
+        `초단기실황: 새로운 데이터 조회`,
+        `초단기실황: 새로운 데이터 조회`
       );
     });
   }
