@@ -398,7 +398,8 @@ module.exports.getData = (req, res) => {
             TEXT,
             DATE_TIME AS DATE
             FROM weather_text
-            WHERE CONVERT(NOW(), DATE) <= CONVERT(DATE_TIME, DATE)
+            WHERE CONVERT(NOW(), DATETIME) <= CONVERT(DATE_TIME, DATETIME)
+            ORDER BY DATE ASC
             LIMIT 1
           `, (err, result) => {
             if (err) console.log(err);
