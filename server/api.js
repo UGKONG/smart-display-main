@@ -152,7 +152,7 @@ module.exports.isConnect = (req, res) => {
   }
 
   db.query(`
-    SELECT DATE_TIME,CHECK_DT FROM now_weather ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
+    SELECT DATE_TIME,CHECK_DT FROM now_weather ORDER BY CHECK_DT DESC, DATE_TIME DESC LIMIT 1;
   `, (err, result) => {
     let DT = err ? '-' : DT_FORMAT(result);
     getInfo.ip = getClientIp(req);
@@ -160,43 +160,43 @@ module.exports.isConnect = (req, res) => {
     getInfo.infoList.push({ name: 'nowWeather', value: err ? '-' : DT });
 
     db.query(`
-      SELECT DATE_TIME,CHECK_DT FROM short_weather ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
+      SELECT DATE_TIME,CHECK_DT FROM short_weather ORDER BY CHECK_DT DESC, DATE_TIME DESC LIMIT 1;
     `, (err, result) => {
       DT = err ? '-' : DT_FORMAT(result);
       getInfo.infoList.push({ name: 'shortWeather', value: err ? '-' : DT });
 
       db.query(`
-        SELECT DATE_TIME,CHECK_DT FROM now_dust ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
+        SELECT DATE_TIME,CHECK_DT FROM now_dust ORDER BY CHECK_DT DESC, DATE_TIME DESC LIMIT 1;
       `, (err, result) => {
         DT = err ? '-' : DT_FORMAT(result);
         getInfo.infoList.push({ name: 'nowDust', value: err ? '-' : DT });
         
         db.query(`
-          SELECT DATE_TIME,CHECK_DT FROM short_dust ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
+          SELECT DATE_TIME,CHECK_DT FROM short_dust ORDER BY CHECK_DT DESC, DATE_TIME DESC LIMIT 1;
         `, (err, result) => {
           DT = err ? '-' : DT_FORMAT(result);
           getInfo.infoList.push({ name: 'shortDust', value: err ? '-' : DT });
           
           db.query(`
-            SELECT DATE_TIME,CHECK_DT FROM long_weather1 ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
+            SELECT DATE_TIME,CHECK_DT FROM long_weather1 ORDER BY CHECK_DT DESC, DATE_TIME DESC LIMIT 1;
           `, (err, result) => {
             DT = err ? '-' : DT_FORMAT(result);
             getInfo.infoList.push({ name: 'longWeather1', value: err ? '-' : DT });
 
             db.query(`
-              SELECT DATE_TIME,CHECK_DT FROM long_weather2 ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
+              SELECT DATE_TIME,CHECK_DT FROM long_weather2 ORDER BY CHECK_DT DESC, DATE_TIME DESC LIMIT 1;
             `, (err, result) => {
               DT = err ? '-' : DT_FORMAT(result);
               getInfo.infoList.push({ name: 'longWeather2', value: err ? '-' : DT });
             
               db.query(`
-                SELECT DATE_TIME,CHECK_DT FROM long_detail_dust ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
+                SELECT DATE_TIME,CHECK_DT FROM long_detail_dust ORDER BY CHECK_DT DESC, DATE_TIME DESC LIMIT 1;
               `, (err, result) => {
                 DT = err ? '-' : DT_FORMAT(result);
                 getInfo.infoList.push({ name: 'longDetailDust', value: err ? '-' : DT });
               
                 db.query(`
-                  SELECT DATE_TIME,CHECK_DT FROM weather_text ORDER BY CHECK_DT, DATE_TIME DESC LIMIT 1;
+                  SELECT DATE_TIME,CHECK_DT FROM weather_text ORDER BY CHECK_DT DESC, DATE_TIME DESC LIMIT 1;
                 `, (err, result) => {
                   DT = err ? '-' : DT_FORMAT(result);
                   getInfo.infoList.push({ name: 'weatherText', value: err ? '-' : DT });
