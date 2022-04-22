@@ -227,187 +227,249 @@ module.exports.getLog = (req, res) => {
   });
 }
 
+// 스크린, 페이지 설정
+module.exports.pageControl = (req, res) => {
+  let id = req.query?.id;
+  if (!id) return res.send(fail('장비 ID가 없습니다.'));
+
+  db.query(`
+    SELECT * FROM page_control WHERE HARDWARE_ID = '${id}' ORDER BY ID ASC
+  `, (err, result) => {
+    if (err) {
+      console.log(err);
+      res.send([]);
+      return;
+    }
+    res.send(result);
+  });
+}
+
+// 스크린 정보
+module.exports.getScreen = (req, res) => {
+  let id = req.query?.id;
+  if (!id) return res.send(fail('장비 ID가 없습니다.'));
+
+  db.query(`
+    SELECT
+    scr.ID, scr.NAME, scr.WIDTH, scr.HEIGHT, pc.PAGE_ID, pc.ORDER, c.TEXT AS DEFAULT_PAGE
+    FROM page_control pc
+    LEFT JOIN screen scr ON pc.SCREEN_ID = scr.ID
+    LEFT JOIN common c ON pc.PAGE_ID = c.CODE AND c.CURRENT = 5
+    WHERE pc.HARDWARE_ID = '${id}' AND pc.ORDER = 1
+    ORDER BY pc.ORDER ASC
+  `, (err, result) => {
+    if (err || result.length === 0) return res.send(fail('설정된 스크린이 없습니다.'));
+    result = result.map(item => {
+      item.DEFAULT_PAGE = '/' + item.DEFAULT_PAGE.toLowerCase();
+      return item;
+    });
+    res.send(result);
+  });
+}
+
 // 스마트 가로등 클라이언트에서 요청
 module.exports.getData = (req, res) => {
   let id = req.query?.id;
   if (!id) return res.send(fail('장비 ID가 없습니다.'));
   let now = new Date();
   let _now = new Date();
-  let data = { info: {}, now: {}, today: {}, tomorrow: {}, week: [], text: {} }
+  let data = { info: {}, now: {}, today: {}, tomorrow: {}, week: [], text: {}, img: [], video: [] }
 
   db.query(`
-    SELECT 
-    hl.ID, hl.NAME, hl.AGENT, hl.DESCRIPTION, 
-    ll.NX, ll.NY, hl.LOCATION_ID, ll.PATH1, ll.PATH2, ll.PATH3,
-    hl.STATION_ID, sl.SIDO_NAME, sl.STATION_NAME,
-    hl.AREA_ID, al.AREA, al.CITY, al.CODE1, al.CODE2
+    SELECT
+    pc.ID, pc.SCREEN_ID, scr.NAME AS SCREEN_NAME, scr.WIDTH AS SCREEN_WIDTH, scr.HEIGHT AS SCREEN_HEIGHT, pc.ORDER,
+    pc.PAGE_ID, pc.TIMER, pc.MEDIA_URL, pg.NAME AS PAGE_NAME, pg.TITLE AS PAGE_TITLE, pg.DEFAULT_TIMER AS PAGE_DEFAULT_TIMER, pg.DESCRIPTION AS PAGE_DESCRIPTION
     FROM hardware_list hl
-    LEFT JOIN location_list ll ON hl.LOCATION_ID = ll.ID
-    LEFT JOIN station_list sl ON hl.STATION_ID = sl.ID
-    LEFT JOIN area_list al ON hl.AREA_ID = al.ID
-    WHERE hl.ID = '${id}'
+    LEFT JOIN page_control pc ON hl.ID = pc.HARDWARE_ID
+    LEFT JOIN screen scr ON pc.SCREEN_ID = scr.ID
+    LEFT JOIN page pg ON pc.PAGE_ID = pg.ID
+    WHERE hl.ID = ${id}
+    ORDER BY pc.ORDER ASC
   `, (err, result) => {
     if (err || result?.length === 0) return res.send(fail('해당 ID와 일치하는 장비가 없습니다.'));
-    let HW = result[0];
+    let SCREEN_DATA = result;
 
-    data.info = {
-      ID: HW.ID,
-      NAME: HW.NAME,
-      AGENT: HW.AGENT,
-      DESCRIPTION: HW.DESCRIPTION,
-      LOCATION: {
-        ID: HW.LOCATION_ID,
-        PATH1: HW.PATH1,
-        PATH2: HW.PATH2,
-        PATH3: HW.PATH3,
-      },
-      STATION: {
-        ID: HW.STATION_ID,
-        SIDO_NAME: HW.SIDO_NAME,
-        STATION_NAME: HW.STATION_NAME,
-      },
-      AREA: {
-        ID: HW.AREA_ID,
-        AREA: HW.AREA,
-        CITY: HW.CITY,
-        CODE1: HW.CODE1,
-        CODE2: HW.CODE2,
-      },
-      NOW: useDateFormat(new Date()),
-      IP1: getClientIp(req),
-      IP2: address()
-    };
-
-    // now 요청
     db.query(`
-      SELECT
-      c.ID,
-      d.SKY, g.TEXT AS SKY_TEXT,
-      c.T1H AS TMP, CONCAT(CONVERT(c.T1H, CHAR), '℃') AS TMP_TEXT,
-      f.pm10Value AS PM10, 
-      h.TEXT AS PM10_TEXT,
-      f.pm25Value AS PM25, 
-      i.TEXT AS PM25_TEXT,
-      f.o3Value AS O3, CONCAT(CONVERT(f.o3Value, CHAR), 'ppm') AS O3_TEXT,
-      c.DATE_TIME AS WEATHER_DATE,
-      f.DATE_TIME AS DUST_DATE
-      FROM hardware_list a
-      LEFT JOIN location_list b ON a.LOCATION_ID = b.ID
-      LEFT JOIN now_weather c ON b.NX = c.NX AND b.NY = c.NY
-      LEFT JOIN short_weather d ON c.DATE_TIME = d.DATE_TIME
-      LEFT JOIN station_list e ON a.STATION_ID = e.ID
-      LEFT JOIN now_dust f ON e.STATION_NAME = f.STATION
-      LEFT JOIN common g ON d.SKY = g.CODE AND g.CURRENT = 2
-      LEFT JOIN common h ON f.pm10Grade = h.CODE AND h.CURRENT = 1
-      LEFT JOIN common i ON f.pm25Grade = i.CODE AND i.CURRENT = 1
-      WHERE a.ID = '${id}'
-      ORDER BY c.DATE_TIME desc, f.DATE_TIME desc
-      LIMIT 1
+      SELECT 
+      hl.ID, hl.NAME, hl.AGENT, hl.DESCRIPTION, 
+      ll.NX, ll.NY, hl.LOCATION_ID, ll.PATH1, ll.PATH2, ll.PATH3,
+      hl.STATION_ID, sl.SIDO_NAME, sl.STATION_NAME,
+      hl.AREA_ID, al.AREA, al.CITY, al.CODE1, al.CODE2
+      FROM hardware_list hl
+      LEFT JOIN location_list ll ON hl.LOCATION_ID = ll.ID
+      LEFT JOIN station_list sl ON hl.STATION_ID = sl.ID
+      LEFT JOIN area_list al ON hl.AREA_ID = al.ID
+      WHERE hl.ID = '${id}'
     `, (err, result) => {
-      if (err) console.log(err);
-      if (err || result.length === 0) return res.send(data);
+      if (err || result?.length === 0) return res.send(fail('해당 ID와 일치하는 장비가 없습니다.'));
+      let HW = result[0];
 
-      // 오늘
-      data.now = result[0] ?? {};
+      data.info = {
+        ID: HW.ID,
+        NAME: HW.NAME,
+        AGENT: HW.AGENT,
+        DESCRIPTION: HW.DESCRIPTION,
+        PAGE: SCREEN_DATA,
+        LOCATION: {
+          ID: HW.LOCATION_ID, PATH1: HW.PATH1, PATH2: HW.PATH2, PATH3: HW.PATH3,
+        },
+        STATION: {
+          ID: HW.STATION_ID, SIDO_NAME: HW.SIDO_NAME, STATION_NAME: HW.STATION_NAME,
+        },
+        AREA: {
+          ID: HW.AREA_ID, AREA: HW.AREA, CITY: HW.CITY, CODE1: HW.CODE1, CODE2: HW.CODE2,
+        },
+        NOW: useDateFormat(new Date()),
+        IP1: getClientIp(req),
+        IP2: address()
+      };
 
+      // now 요청
       db.query(`
         SELECT
-        sw.ID,
-        sw.SKY, c1.TEXT AS SKY_TEXT, 
-        sw.TMP, sw.POP,
-        sd.VALUE10 AS PM10,
-        c2.TEXT AS PM10_TEXT,  
-        sd.VALUE25 AS PM25,
-        c3.TEXT AS PM25_TEXT, 
-        CONVERT(sw.DATE_TIME, CHAR(10)) AS DATE,
-        sw.DATE_TIME
-        FROM hardware_list hl
-        LEFT JOIN location_list ll ON hl.LOCATION_ID = ll.ID
-        LEFT JOIN short_weather sw ON ll.NX = sw.NX AND ll.NY = sw.NY
-        LEFT JOIN area_list al ON hl.AREA_ID = al.ID
-        LEFT JOIN station_list sl ON hl.STATION_ID = sl.ID
-        LEFT JOIN short_dust sd ON sl.SIDO_NAME = sd.LOCATION
-        LEFT JOIN common c1 ON sw.SKY = c1.CODE AND c1.CURRENT = 2
-        LEFT JOIN common c2 ON sd.VALUE10 = c2.CODE AND c2.CURRENT = 1
-        LEFT JOIN common c3 ON sd.VALUE25 = c3.CODE AND c3.CURRENT = 1
-        WHERE hl.ID = '${id}' AND 
-        CONVERT(sw.DATE_TIME, DATE) >= CONVERT(NOW(), DATE) AND
-        CONVERT(sd.DATE_TIME, DATE) >= CONVERT(NOW(), DATE) AND
-        CONVERT(sw.DATE_TIME, DATE) = CONVERT(sd.DATE_TIME, DATE)
-        ORDER BY sw.DATE_TIME ASC
+        c.ID,
+        d.SKY, g.TEXT AS SKY_TEXT,
+        c.T1H AS TMP, CONCAT(CONVERT(c.T1H, CHAR), '℃') AS TMP_TEXT,
+        f.pm10Value AS PM10, 
+        h.TEXT AS PM10_TEXT,
+        f.pm25Value AS PM25, 
+        i.TEXT AS PM25_TEXT,
+        f.o3Value AS O3, CONCAT(CONVERT(f.o3Value, CHAR), 'ppm') AS O3_TEXT,
+        c.DATE_TIME AS WEATHER_DATE,
+        f.DATE_TIME AS DUST_DATE
+        FROM hardware_list a
+        LEFT JOIN location_list b ON a.LOCATION_ID = b.ID
+        LEFT JOIN now_weather c ON b.NX = c.NX AND b.NY = c.NY
+        LEFT JOIN short_weather d ON c.DATE_TIME = d.DATE_TIME
+        LEFT JOIN station_list e ON a.STATION_ID = e.ID
+        LEFT JOIN now_dust f ON e.STATION_NAME = f.STATION
+        LEFT JOIN common g ON d.SKY = g.CODE AND g.CURRENT = 2
+        LEFT JOIN common h ON f.pm10Grade = h.CODE AND h.CURRENT = 1
+        LEFT JOIN common i ON f.pm25Grade = i.CODE AND i.CURRENT = 1
+        WHERE a.ID = '${id}'
+        ORDER BY c.DATE_TIME desc, f.DATE_TIME desc
+        LIMIT 1
       `, (err, result) => {
         if (err) console.log(err);
         if (err || result.length === 0) return res.send(data);
 
-        // 최저/최고 필터 함수
-        const filterMinMax = (arr) => {
-          let min = arr.filter(item => {
-            let calc = new Date(item.DATE + ' ' + '12:00:00') - new Date(item.DATE_TIME).getTime() > 0;
-            if (calc) return item;
-          }).sort((x, y) => x.TMP - y.TMP)[0];
-
-          let max = arr.filter(item => {
-            let calc = new Date(item.DATE + ' ' + '12:00:00') - new Date(item.DATE_TIME).getTime() <= 0;
-            if (calc) return item;
-          }).sort((x, y) => y.TMP - x.TMP)[0];
-
-          return { min, max };
-        }
-
         // 오늘
-        let todayArr = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? [];
-        data.today = filterMinMax(todayArr);
-        
-        // 내일
-        now.setDate(now.getDate() + 1);
-        let tomorrowArr = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? [];
-        data.tomorrow = filterMinMax(tomorrowArr);
-        
-        // 모레 날짜 셋팅
-        _now.setDate(_now.getDate() + 2);
-        let afterTomorrowDate = useDateFormat(_now, true);
+        data.now = result[0] ?? {};
 
-        // 중기
         db.query(`
           SELECT
-          hl.ID,
-          lw2.SKY_PM AS SKY,
-          c.TEXT AS SKY_TEXT,
-          lw1.MIN, lw1.MAX,
-          lw2.RAIN_PM AS RAIN,
-          CONVERT(lw1.DATE_TIME, CHAR(10)) AS DATE
+          sw.ID,
+          sw.SKY, c1.TEXT AS SKY_TEXT, 
+          sw.TMP, sw.POP,
+          sd.VALUE10 AS PM10,
+          c2.TEXT AS PM10_TEXT,  
+          sd.VALUE25 AS PM25,
+          c3.TEXT AS PM25_TEXT, 
+          CONVERT(sw.DATE_TIME, CHAR(10)) AS DATE,
+          sw.DATE_TIME
           FROM hardware_list hl
+          LEFT JOIN location_list ll ON hl.LOCATION_ID = ll.ID
+          LEFT JOIN short_weather sw ON ll.NX = sw.NX AND ll.NY = sw.NY
           LEFT JOIN area_list al ON hl.AREA_ID = al.ID
-          LEFT JOIN long_weather1 lw1 ON al.CODE1 = lw1.AREA_CODE AND 
-          lw1.DATE_TIME >= '${afterTomorrowDate} 00:00:00'
-          INNER JOIN long_weather2 lw2 ON al.CODE2 = lw2.AREA_CODE AND lw1.DATE_TIME = lw2.DATE_TIME
-          LEFT JOIN common c ON lw2.SKY_PM = c.CODE AND c.CURRENT = 2
-          WHERE hl.ID = '${id}'
-          ORDER BY lw1.DATE_TIME ASC
-          LIMIT 4;
+          LEFT JOIN station_list sl ON hl.STATION_ID = sl.ID
+          LEFT JOIN short_dust sd ON sl.SIDO_NAME = sd.LOCATION
+          LEFT JOIN common c1 ON sw.SKY = c1.CODE AND c1.CURRENT = 2
+          LEFT JOIN common c2 ON sd.VALUE10 = c2.CODE AND c2.CURRENT = 1
+          LEFT JOIN common c3 ON sd.VALUE25 = c3.CODE AND c3.CURRENT = 1
+          WHERE hl.ID = '${id}' AND 
+          CONVERT(sw.DATE_TIME, DATE) >= CONVERT(NOW(), DATE) AND
+          CONVERT(sd.DATE_TIME, DATE) >= CONVERT(NOW(), DATE) AND
+          CONVERT(sw.DATE_TIME, DATE) = CONVERT(sd.DATE_TIME, DATE)
+          ORDER BY sw.DATE_TIME ASC
         `, (err, result) => {
           if (err) console.log(err);
           if (err || result.length === 0) return res.send(data);
 
-          // 중기
-          data.week = result;
+          // 최저/최고 필터 함수
+          const filterMinMax = (arr) => {
+            let min = arr.filter(item => {
+              let calc = new Date(item.DATE + ' ' + '12:00:00') - new Date(item.DATE_TIME).getTime() > 0;
+              if (calc) return item;
+            }).sort((x, y) => x.TMP - y.TMP)[0];
 
-          // 날씨 통보문
+            let max = arr.filter(item => {
+              let calc = new Date(item.DATE + ' ' + '12:00:00') - new Date(item.DATE_TIME).getTime() <= 0;
+              if (calc) return item;
+            }).sort((x, y) => y.TMP - x.TMP)[0];
+
+            return { min, max };
+          }
+
+          // 오늘
+          let todayArr = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? [];
+          data.today = filterMinMax(todayArr);
+          
+          // 내일
+          now.setDate(now.getDate() + 1);
+          let tomorrowArr = result?.filter(x => x.DATE === useDateFormat(now, true)) ?? [];
+          data.tomorrow = filterMinMax(tomorrowArr);
+          
+          // 모레 날짜 셋팅
+          _now.setDate(_now.getDate() + 2);
+          let afterTomorrowDate = useDateFormat(_now, true);
+
+          // 중기
           db.query(`
             SELECT
-            ID,
-            TEXT,
-            DATE_TIME AS DATE
-            FROM weather_text
-            WHERE CONVERT(NOW(), DATETIME) <= CONVERT(DATE_TIME, DATETIME)
-            ORDER BY DATE ASC
-            LIMIT 1
+            hl.ID,
+            lw2.SKY_PM AS SKY,
+            c.TEXT AS SKY_TEXT,
+            lw1.MIN, lw1.MAX,
+            lw2.RAIN_PM AS RAIN,
+            CONVERT(lw1.DATE_TIME, CHAR(10)) AS DATE
+            FROM hardware_list hl
+            LEFT JOIN area_list al ON hl.AREA_ID = al.ID
+            LEFT JOIN long_weather1 lw1 ON al.CODE1 = lw1.AREA_CODE AND 
+            lw1.DATE_TIME >= '${afterTomorrowDate} 00:00:00'
+            INNER JOIN long_weather2 lw2 ON al.CODE2 = lw2.AREA_CODE AND lw1.DATE_TIME = lw2.DATE_TIME
+            LEFT JOIN common c ON lw2.SKY_PM = c.CODE AND c.CURRENT = 2
+            WHERE hl.ID = '${id}'
+            ORDER BY lw1.DATE_TIME ASC
+            LIMIT 4;
           `, (err, result) => {
             if (err) console.log(err);
             if (err || result.length === 0) return res.send(data);
-            
-            data.text = result[0];
-            res.send(data);
+
+            // 중기
+            data.week = result;
+
+            // 날씨 통보문
+            db.query(`
+              SELECT
+              ID,
+              TEXT,
+              DATE_TIME AS DATE
+              FROM weather_text
+              WHERE CONVERT(NOW(), DATETIME) <= CONVERT(DATE_TIME, DATETIME)
+              ORDER BY DATE ASC
+              LIMIT 1
+            `, (err, result) => {
+              if (err) console.log(err);
+              if (err || result.length === 0) return res.send(data);
+              data.text = result[0];
+
+              db.query(`
+                SELECT
+                pc.ID, pc.SCREEN_ID, pc.PAGE_ID, pg.TYPE AS PAGE_TYPE, pc.TIMER, pc.MEDIA_URL
+                FROM page_control pc
+                LEFT JOIN page pg ON pc.PAGE_ID = pg.ID
+                WHERE pc.HARDWARE_ID = '${id}' AND pc.MEDIA_URL IS NOT NULL AND (pg.TYPE = 2 OR pg.TYPE = 3)
+                ORDER BY pc.SCREEN_ID ASC
+              `, (err, result) => {
+                if (err) console.log(err);
+                if (err) return res.send(data);
+
+                data.img = result.filter(x => x.PAGE_TYPE === 2);
+                data.video = result.filter(x => x.PAGE_TYPE === 3);
+
+                res.send(data);
+              })
+            });
           });
         });
       });
