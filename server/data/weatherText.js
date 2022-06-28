@@ -1,6 +1,6 @@
 const request = require('request');
 const conf = require('../config.json').api.subject.weatherText;
-const { useQueryString, log, apiError, useDateFormat, useNow } = require('../hook');
+const { useQueryString, log, apiError, useDateFormat, useNow, dbConnect } = require('../hook');
 
 module.exports = {
   getWeatherText() {
@@ -88,19 +88,22 @@ module.exports = {
       insertSQL.push(`('${dateTime}','${item.text}','${useNow()}')`);
     });
     
-    db.query(`
-      INSERT INTO weather_text
-      (DATE_TIME,TEXT,CHECK_DT)
-      VALUES
-      ${insertSQL.join(',')}
-      ON DUPLICATE KEY UPDATE
-      TEXT=VALUES(TEXT),CHECK_DT=VALUES(CHECK_DT)
-    `, (err, result) => {
-      if (err) return log('기상개황조회 데이터 조회 실패', err);
-      log(
-        '기상개황조회: 새로운 데이터 조회',
-        '기상개황조회: 새로운 데이터 조회'
-      );
+    dbConnect(db => {
+      db.query(`
+        INSERT INTO weather_text
+        (DATE_TIME,TEXT,CHECK_DT)
+        VALUES
+        ${insertSQL.join(',')}
+        ON DUPLICATE KEY UPDATE
+        TEXT=VALUES(TEXT),CHECK_DT=VALUES(CHECK_DT)
+      `, (err, result) => {
+        db.end();
+        if (err) return log('기상개황조회 데이터 조회 실패', err);
+        log(
+          '기상개황조회: 새로운 데이터 조회',
+          '기상개황조회: 새로운 데이터 조회'
+        );
+      });
     });
   }
 }

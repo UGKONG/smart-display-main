@@ -1,10 +1,12 @@
 {
   "db": {
-    "host": "liansoft.cafe24app.com",
+    "host": "db.smartpole.enwiser.com",
     "port": "3306",
-    "user": "jeonsanguk",
-    "password": "dkfhqufdl1!",
-    "database": "jeonsanguk"
+    "user": "smartpole",
+    "password": "smartpole0421@",
+    "database": "dbsmartpole",
+    "multipleStatements": true,
+    "connectTimeout": 1000000
   },
   "api": {
     "get": 60000,

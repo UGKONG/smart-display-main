@@ -1,6 +1,6 @@
 const request = require('request');
 const conf = require('../config.json').api.subject.shortDust;
-const { useNow, useQueryString, useDateFormat, log, apiError } = require('../hook');
+const { useNow, useQueryString, useDateFormat, log, apiError, dbConnect } = require('../hook');
 
 module.exports = {
   getShortDustSet (lastDataRequest) {
@@ -104,21 +104,24 @@ module.exports = {
       insertSQL.push(`('${item.date} 00:00:00','${item.location}','${item.baseDate}','${item.baseTime}','${item.value10}','${item.value25}','${useNow()}')`);
     });
 
-    db.query(`
-      INSERT INTO short_dust
-      (DATE_TIME,LOCATION,BASE_DT,BASE_TM,VALUE10,VALUE25,CHECK_DT)
-      VALUES
-      ${insertSQL.join(',')}
-      ON DUPLICATE KEY UPDATE
-      BASE_DT=VALUES(BASE_DT),BASE_TM=VALUES(BASE_TM),
-      VALUE10=VALUES(VALUE10),VALUE25=VALUES(VALUE25),
-      CHECK_DT=VALUES(CHECK_DT)
-    `, (err, result) => {
-      if (err) return log(`대기질 예보통보 조회 실패`, err);
-      log(
-        `대기질 예보통보 조회: 새로운 데이터 조회`,
-        `대기질 예보통보 조회: 새로운 데이터 조회`
-      );
+    dbConnect(db => {
+      db.query(`
+        INSERT INTO short_dust
+        (DATE_TIME,LOCATION,BASE_DT,BASE_TM,VALUE10,VALUE25,CHECK_DT)
+        VALUES
+        ${insertSQL.join(',')}
+        ON DUPLICATE KEY UPDATE
+        BASE_DT=VALUES(BASE_DT),BASE_TM=VALUES(BASE_TM),
+        VALUE10=VALUES(VALUE10),VALUE25=VALUES(VALUE25),
+        CHECK_DT=VALUES(CHECK_DT)
+      `, (err, result) => {
+        db.end();
+        if (err) return log(`대기질 예보통보 조회 실패`, err);
+        log(
+          `대기질 예보통보 조회: 새로운 데이터 조회`,
+          `대기질 예보통보 조회: 새로운 데이터 조회`
+        );
+      });
     });
   }
 }

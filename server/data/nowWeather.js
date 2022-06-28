@@ -1,6 +1,6 @@
 const request = require('request');
 const conf = require('../config.json').api.subject.nowWeather;
-const { useNow, useQueryString, log, apiError } = require('../hook');
+const { useNow, useQueryString, log, apiError, dbConnect } = require('../hook');
 
 module.exports = {
   getNowWeatherSet (lastDataRequest) {
@@ -9,14 +9,17 @@ module.exports = {
     time = time.slice(0, 2);
     time = time + '00';
 
-    db.query(`
-      SELECT DISTINCT b.NX, b.NY FROM 
-      hardware_list AS a 
-      LEFT JOIN location_list AS b ON a.LOCATION_ID = b.ID
-    `, (err, result) => {
-      if (err) return log('위치 정보 조회 요청에 실패하였습니다.', err);
-      
-      result.forEach(loc => this.getNowWeather({ date, time, loc }));
+    dbConnect(db => {
+      db.query(`
+        SELECT DISTINCT b.NX, b.NY FROM 
+        hardware_list AS a 
+        LEFT JOIN location_list AS b ON a.LOCATION_ID = b.ID
+      `, (err, result) => {
+        if (err) return log('위치 정보 조회 요청에 실패하였습니다.', err);
+        
+        result.forEach(loc => this.getNowWeather({ date, time, loc }));
+        db.end();
+      });
     });
   },
   getNowWeather ({ date, time, loc }) {
@@ -71,19 +74,22 @@ module.exports = {
       ([date.slice(0, 4), '-', date.slice(4, 6), '-', date.slice(6, 8)]).join('') + ' ' +
       ([time.slice(0, 2), ':', time.slice(2, 4), ':', '00']).join('');
 
-    db.query(`
-      INSERT INTO now_weather
-      (NX,NY,BASE_TM,BASE_DT,DATE_TIME,${conf.category.join(',')},CHECK_DT)
-      VALUES
-      (${loc.NX},${loc.NY},'${time}','${date}','${dateTime}',${insertSQL.join(',')},'${useNow()}')
-      ON DUPLICATE KEY UPDATE
-      ${updateSQL.join(',')},CHECK_DT=VALUES(CHECK_DT)
-    `, (err, result) => {
-      if (err) return log(`초단기실황 데이터 조회 실패`, err);
-      log(
-        `초단기실황: 새로운 데이터 조회`,
-        `초단기실황: 새로운 데이터 조회`
-      );
-    });
+    dbConnect(db => {
+      db.query(`
+        INSERT INTO now_weather
+        (NX,NY,BASE_TM,BASE_DT,DATE_TIME,${conf.category.join(',')},CHECK_DT)
+        VALUES
+        (${loc.NX},${loc.NY},'${time}','${date}','${dateTime}',${insertSQL.join(',')},'${useNow()}')
+        ON DUPLICATE KEY UPDATE
+        ${updateSQL.join(',')},CHECK_DT=VALUES(CHECK_DT)
+      `, (err, result) => {
+        if (err) return log(`초단기실황 데이터 조회 실패`, err);
+        log(
+          `초단기실황: 새로운 데이터 조회`,
+          `${useNow()}: 초단기실황: 새로운 데이터 조회`
+        );
+        db.end();
+      });
+    })
   }
 }

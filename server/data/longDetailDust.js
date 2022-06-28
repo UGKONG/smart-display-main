@@ -1,6 +1,6 @@
 const request = require('request');
 const conf = require('../config.json').api.subject.longDetailDust;
-const { useQueryString, log, apiError, useNow } = require('../hook');
+const { useQueryString, log, apiError, useNow, dbConnect } = require('../hook');
 
 module.exports = {
   getLongDetailDustSet (lastDataRequest) {
@@ -76,19 +76,22 @@ module.exports = {
       insertSQL.push(`('${item.date} 00:00:00','${item.location}','${item.baseDate}','${item.value}','${useNow()}')`);
     });
     
-    db.query(`
-      INSERT INTO long_detail_dust
-      (DATE_TIME,LOCATION,BASE_DT,VALUE,CHECK_DT)
-      VALUES
-      ${insertSQL}
-      ON DUPLICATE KEY UPDATE
-      BASE_DT=VALUES(BASE_DT),VALUE=VALUES(VALUE),CHECK_DT=VALUES(CHECK_DT)
-    `, (err, result) => {
-      if (err) return log('초미세먼지 주간예보 조회 실패 (모든장비)', err);
-      log(
-        '초미세먼지 주간예보 조회: 새로운 데이터 조회 (모든장비)',
-        '초미세먼지 주간예보 조회: 새로운 데이터 조회 (모든장비)'
-      );
-    });
+    dbConnect(db => {
+      db.query(`
+        INSERT INTO long_detail_dust
+        (DATE_TIME,LOCATION,BASE_DT,VALUE,CHECK_DT)
+        VALUES
+        ${insertSQL}
+        ON DUPLICATE KEY UPDATE
+        BASE_DT=VALUES(BASE_DT),VALUE=VALUES(VALUE),CHECK_DT=VALUES(CHECK_DT)
+      `, (err, result) => {
+        db.end();
+        if (err) return log('초미세먼지 주간예보 조회 실패 (모든장비)', err);
+        log(
+          '초미세먼지 주간예보 조회: 새로운 데이터 조회 (모든장비)',
+          '초미세먼지 주간예보 조회: 새로운 데이터 조회 (모든장비)'
+        );
+      });
+    })
   }
 }

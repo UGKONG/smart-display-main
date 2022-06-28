@@ -1,48 +1,52 @@
 const request = require('request');
 const conf = require('../config.json').api.subject.longWeather1;
-const { useQueryString, log, apiError, useNow, useDateFormat } = require('../hook');
+const { useQueryString, log, apiError, useNow, useDateFormat, dbConnect } = require('../hook');
 
 module.exports = {
   getLongWeatherSet(lastDataRequest) {
-    db.query(`
-      SELECT DISTINCT b.CODE1 FROM
-      hardware_list a LEFT JOIN area_list b
-      ON a.AREA_ID = b.ID
-    `, (err, result) => {
-      if (err) return console.log(err);
 
-      let dateTime = useNow({ hour: 0, format: false });
-      let time = dateTime.split(' ')[1];
-      time = time.slice(0, 2) + '00';
-
-      let isGetMinutes = conf.time.indexOf(time);
-      if (isGetMinutes > -1) {  // 현재 시간이 요청 시간일때
-        [date] = useNow({ hour: lastDataRequest ? -12 : 0, format: false }).split(' ');
-
-      } else {  // 현재 시간이 요청 시간이 아닐때
-
-        let _date = new Date();
-        _date.setHours(0);_date.setMinutes(0);_date.setSeconds(0);
-        
-        let getTimeList = [...conf.time];
-        getTimeList.push(time);
-        getTimeList = getTimeList.sort((x, y) => x - y);
-        let getTimeIdx = getTimeList.indexOf(time);
-
-        if (getTimeIdx === 0) {
-          time = getTimeList[getTimeList.length - 1];
-          _date.setHours(_date.getHours() - 1);
-        } else {
-          time = getTimeList[getTimeIdx - 1];
+    dbConnect(db => {
+      db.query(`
+        SELECT DISTINCT b.CODE1 FROM
+        hardware_list a LEFT JOIN area_list b
+        ON a.AREA_ID = b.ID
+      `, (err, result) => {
+        db.end();
+        if (err) return console.log(err);
+  
+        let dateTime = useNow({ hour: 0, format: false });
+        let time = dateTime.split(' ')[1];
+        time = time.slice(0, 2) + '00';
+  
+        let isGetMinutes = conf.time.indexOf(time);
+        if (isGetMinutes > -1) {  // 현재 시간이 요청 시간일때
+          [date] = useNow({ hour: lastDataRequest ? -12 : 0, format: false }).split(' ');
+  
+        } else {  // 현재 시간이 요청 시간이 아닐때
+  
+          let _date = new Date();
+          _date.setHours(0);_date.setMinutes(0);_date.setSeconds(0);
+          
+          let getTimeList = [...conf.time];
+          getTimeList.push(time);
+          getTimeList = getTimeList.sort((x, y) => x - y);
+          let getTimeIdx = getTimeList.indexOf(time);
+  
+          if (getTimeIdx === 0) {
+            time = getTimeList[getTimeList.length - 1];
+            _date.setHours(_date.getHours() - 1);
+          } else {
+            time = getTimeList[getTimeIdx - 1];
+          }
+  
+          let dateFormat = useDateFormat(_date)?.split(' ')[0];
+          let [y, m, d] = dateFormat.split('-');
+  
+          date = y + m + d;
         }
-
-        let dateFormat = useDateFormat(_date)?.split(' ')[0];
-        let [y, m, d] = dateFormat.split('-');
-
-        date = y + m + d;
-      }
-    
-      result.forEach(item => this.getLongWeather({ areaCode: item.CODE1, date, time }));
+      
+        result.forEach(item => this.getLongWeather({ areaCode: item.CODE1, date, time }));
+      });
     });
 
   },
@@ -104,21 +108,24 @@ module.exports = {
       insertSQL.push(`('${areaCode}','${item.date} 00:00:00',${item.min},${item.max},'${time}','${date}','${useNow()}')`);
     });
 
-    db.query(`
-      INSERT INTO long_weather1
-      (AREA_CODE,DATE_TIME,MIN,MAX,BASE_TM,BASE_DT,CHECK_DT)
-      VALUES
-      ${insertSQL.join(',')}
-      ON DUPLICATE KEY UPDATE
-      MIN=VALUES(MIN),MAX=VALUES(MAX),
-      BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),
-      CHECK_DT=VALUES(CHECK_DT)
-    `, (err, result) => {
-      if (err) return log(`중기예보(기온) 조회 실패`, err);
-      log(
-        `중기예보(기온) 조회: 새로운 데이터 조회`,
-        `중기예보(기온) 조회: 새로운 데이터 조회`
-      );
+    dbConnect(db => {
+      db.query(`
+        INSERT INTO long_weather1
+        (AREA_CODE,DATE_TIME,MIN,MAX,BASE_TM,BASE_DT,CHECK_DT)
+        VALUES
+        ${insertSQL.join(',')}
+        ON DUPLICATE KEY UPDATE
+        MIN=VALUES(MIN),MAX=VALUES(MAX),
+        BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),
+        CHECK_DT=VALUES(CHECK_DT)
+      `, (err, result) => {
+        db.end();
+        if (err) return log(`중기예보(기온) 조회 실패`, err);
+        log(
+          `중기예보(기온) 조회: 새로운 데이터 조회`,
+          `중기예보(기온) 조회: 새로운 데이터 조회`
+        );
+      });
     })
-  }
+    }
 }

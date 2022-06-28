@@ -1,3 +1,4 @@
+// const { db } = require('../index');
 const { useNow, log } = require('./hook');
 const intervalTime = require('./config.json').api.get;
 const conf = require('./config.json').api.subject;
@@ -52,8 +53,17 @@ module.exports.serverStart = () => {
 }
 
 // Database 연결 함수
-module.exports.dbConnect = (err) => {
-  if (err) return log('데이터베이스 연결에 실패하였습니다.', '데이터베이스 연결에 실패하였습니다.');
+module.exports.dbConnectCallback = (err) => {
+  if (err) return db.end();
   log('데이터베이스 연결 성공');
   console.log(useNow() + ' : 서버 & DB 연결');
+  db.end();
+}
+
+// Database 연결 에러 함수
+module.exports.dbConnectErr = (err) => {
+  if (err && err.code === 'PROTOCOL_CONNECTION_LOST') {
+    db.end();
+    db.connect(this.dbConnect);
+  }
 }

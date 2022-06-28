@@ -4,21 +4,24 @@
 const express = require('express');
 const app = express();
 const mysql = require('mysql');
-const db = mysql.createConnection(require('./server/config.json').db);
+// let db = mysql.createConnection(require('./server/config.json').db);
 
-// 서버엔진, 데이터베이스 내보내기
-module.exports = { db, app };
-global.app = app;
-global.db = db;
 
 // 엔진 셋팅
 app.use(require('cors')());
 app.use('/', express.static(__dirname + '/client/build'));
 
+// 서버엔진, 데이터베이스 내보내기
+module.exports = { app };
+global.app = app;
+// global.db = db;
+
 // 실행
-const { serverStart, dbConnect } = require('./server/main');
-db.connect(dbConnect);
-app.listen(8001, '0.0.0.0', serverStart);
+const { serverStart, dbConnectCallback, dbConnectErr } = require('./server/main');
+// db.connect(dbConnectCallback);
+// db.on('error', dbConnectErr);
+app.listen(8080, '0.0.0.0', serverStart);
+
 
 // API에 사용되는 함수 가져오기
 const {

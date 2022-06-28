@@ -1,6 +1,6 @@
 const request = require('request');
 const conf = require('../config.json').api.subject.shortWeather;
-const { useNow, useQueryString, useDateFormat, log, apiError, useCleanArray } = require('../hook');
+const { useNow, useQueryString, useDateFormat, log, apiError, useCleanArray, dbConnect } = require('../hook');
 
 module.exports = {
   getShortWeatherSet (lastDataRequest) {
@@ -35,13 +35,16 @@ module.exports = {
       date = y + m + d;
     }
     
-    db.query(`
-      SELECT DISTINCT b.NX, b.NY FROM 
-      hardware_list AS a LEFT JOIN location_list AS b 
-      ON a.LOCATION_ID = b.ID
-    `, (err, result) => {
-      if (err) return log('위치 정보 조회 요청에 실패하였습니다.', err);
-      result.forEach(loc => this.getShortWeather({ time, date, loc }));
+    dbConnect(db => {
+      db.query(`
+        SELECT DISTINCT b.NX, b.NY FROM 
+        hardware_list AS a LEFT JOIN location_list AS b 
+        ON a.LOCATION_ID = b.ID
+      `, (err, result) => {
+        db.end();
+        if (err) return log('위치 정보 조회 요청에 실패하였습니다.', err);
+        result.forEach(loc => this.getShortWeather({ time, date, loc }));
+      });
     });
 
   },
@@ -124,19 +127,22 @@ module.exports = {
       insertSQL.push(`(${itemInsertVal.join(',')},'${time}','${date}','${useNow()}')`);
     });
 
-    db.query(`
-      INSERT INTO short_weather
-      (NX,NY,DATE_TIME,${conf.category.join(',')},BASE_TM,BASE_DT,CHECK_DT)
-      VALUES
-      ${insertSQL.join(',')}
-      ON DUPLICATE KEY UPDATE
-      ${updateSQL.join(',')},BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),CHECK_DT=VALUES(CHECK_DT)
-    `, (err, result) => {
-      if (err) return log(`단기예보 데이터 조회 실패`, err);
-      log(
-        `단기예보: 새로운 데이터 조회`,
-        `단기예보: 새로운 데이터 조회`
-      );
+    dbConnect(db => {
+      db.query(`
+        INSERT INTO short_weather
+        (NX,NY,DATE_TIME,${conf.category.join(',')},BASE_TM,BASE_DT,CHECK_DT)
+        VALUES
+        ${insertSQL.join(',')}
+        ON DUPLICATE KEY UPDATE
+        ${updateSQL.join(',')},BASE_TM=VALUES(BASE_TM),BASE_DT=VALUES(BASE_DT),CHECK_DT=VALUES(CHECK_DT)
+      `, (err, result) => {
+        db.end();
+        if (err) return log(`단기예보 데이터 조회 실패`, err);
+        log(
+          `단기예보: 새로운 데이터 조회`,
+          `단기예보: 새로운 데이터 조회`
+        );
+      });
     });
   }
 }

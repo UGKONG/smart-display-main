@@ -1,6 +1,13 @@
 const ip = require('ip');
 const _ = require('lodash');
+const mysql = require('mysql');
 const apiErrorCodeList = require('./config.json').api.errorCodeList;
+
+// DB Connection
+module.exports.dbConnect = callback => {
+  let db = mysql.createConnection(require('./config.json').db);
+  callback(db);
+}
 
 // Object -> Query (String) 변환 함수
 module.exports.useQueryString = (obj) => {
@@ -64,12 +71,18 @@ module.exports.useCleanArray = (allArr = [], fieldName, returnKey = []) => {
 
 // log.txt에 log 저장
 module.exports.log = (logText = '', error) => {
-  db.query(`
-    INSERT INTO log (DESCRIPTION,IP) VALUES ('${logText}','${ip.address()}');
-  `, (err, result) => {
-    err && console.log('log 저장에 실패하였습니다.');
-    error && console.log(error);
-  });
+  this.dbConnect(db => {
+    db.query(`
+      INSERT INTO log (DESCRIPTION,IP) VALUES ('${logText}','${ip.address()}');
+    `, (err, result) => {
+      if (err) {
+        console.error('log 저장에 실패하였습니다.', err);
+      }
+      error && console.log(error);
+      
+      db.end();
+    });
+  })
 }
 
 // API 에러 코드 함수
