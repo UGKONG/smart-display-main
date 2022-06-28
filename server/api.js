@@ -1,8 +1,19 @@
 // 클라이언트 // mac
 const { address } = require('ip');
 const { getClientIp } = require('request-ip');
-// const { db } = require('../index.js');
 const { log, fail, useDateFormat, dbConnect } = require('./hook');
+const fs = require('fs');
+const mime = require('mime');
+
+// 리소스 파일 다운로드
+module.exports.getResourceFiles = (req, res) => {
+  const filePath = '/web/resource/build.zip';
+  const fileType = mime.getType(filePath);
+  fs.readFile(filePath, (err, data) => {
+    if (err) return res.send(null);
+    res.set({ 'Content-Type': fileType }).send(data);
+  });
+}
 
 // 장비 리스트 조회
 module.exports.getDevice = (req, res) => {

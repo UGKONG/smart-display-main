@@ -3,7 +3,6 @@
 
 const express = require('express');
 const app = express();
-const fs = require('fs');
 
 // 엔진 셋팅
 app.use(require('cors')());
@@ -33,6 +32,7 @@ const {
   getData,
   getScreen,
   pageControl,
+  getResourceFiles,
 } = require('./server/api');
 
 // API
@@ -49,20 +49,6 @@ app.get('/api/pageControl', pageControl);
 app.get('/api/getScreen', getScreen);
 app.get('/api/getData', getData);
 
-const sftpConf = {
-  host: 'smartpole.enwiser.com',
-  port: '22',
-  username: 'smartpole',
-  password: 'smartpole0421@'
-}
-app.get('/resources', (req, res) => {
-  // fs.readFile(__dirname + '/resources/build.zip', (err, data) => {
-    // err && console.log(err);
-    // if (err) return res.send('Fail');
-    
-    // res.sendFile(data ?? 'none');
-    res.sendFile(__dirname + '/resources/build.zip', (err) => res.send('Success'));
-  // });
-});
+app.get('/resource', getResourceFiles);
 
 app.get('*', pageNotFound);
