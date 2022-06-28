@@ -3,23 +3,19 @@
 
 const express = require('express');
 const app = express();
-const mysql = require('mysql');
-// let db = mysql.createConnection(require('./server/config.json').db);
-
+const fs = require('fs');
 
 // 엔진 셋팅
 app.use(require('cors')());
 app.use('/', express.static(__dirname + '/client/build'));
+// app.use('/resources', express.static(__dirname + '/resources/build.zip'));
 
 // 서버엔진, 데이터베이스 내보내기
 module.exports = { app };
 global.app = app;
-// global.db = db;
 
 // 실행
-const { serverStart, dbConnectCallback, dbConnectErr } = require('./server/main');
-// db.connect(dbConnectCallback);
-// db.on('error', dbConnectErr);
+const { serverStart } = require('./server/main');
 app.listen(8080, '0.0.0.0', serverStart);
 
 
@@ -52,5 +48,21 @@ app.get('/api/log', getLog);
 app.get('/api/pageControl', pageControl);
 app.get('/api/getScreen', getScreen);
 app.get('/api/getData', getData);
+
+const sftpConf = {
+  host: 'smartpole.enwiser.com',
+  port: '22',
+  username: 'smartpole',
+  password: 'smartpole0421@'
+}
+app.get('/resources', (req, res) => {
+  // fs.readFile(__dirname + '/resources/build.zip', (err, data) => {
+    // err && console.log(err);
+    // if (err) return res.send('Fail');
+    
+    // res.sendFile(data ?? 'none');
+    res.sendFile(__dirname + '/resources/build.zip', (err) => res.send('Success'));
+  // });
+});
 
 app.get('*', pageNotFound);
