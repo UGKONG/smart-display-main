@@ -20,7 +20,8 @@ module.exports.getResourceFileCheck = (req, res) => {
   const filePath = __dirname + '/../resource/build.zip';
   fs.readFile(filePath, (err, data) => {
     if (err || !data) return res.send(null);
-    res.send(String(Buffer.byteLength(data)));
+    let size = Buffer.byteLength(data);
+    res.send({ size });
   })
 }
 
@@ -308,7 +309,7 @@ module.exports.getScreen = (req, res) => {
       LEFT JOIN common c ON pc.PAGE_ID = c.CODE AND c.CURRENT = 5
       WHERE pc.HARDWARE_ID = '${id}' AND pc.ORDER = 1
       GROUP BY scr.ID
-      ORDER BY pc.ORDER ASC
+      ORDER BY pc.ORDER ASC, scr.ID;
     `, (err, result) => {
       db.end();
       if (err || result.length === 0) return res.send(fail('설정된 스크린이 없습니다.'));
@@ -427,7 +428,8 @@ module.exports.getData = (req, res) => {
             SELECT
             sw.ID,
             sw.SKY, c1.TEXT AS SKY_TEXT, 
-            sw.TMP, sw.POP,
+            sw.TMP, CONCAT(CONVERT(sw.TMP, CHAR), '℃') AS TMP_TEXT,
+            sw.POP, CONCAT(CONVERT(sw.POP, CHAR), '％') AS POP_TEXT,
             sd.VALUE10 AS PM10,
             c2.TEXT AS PM10_TEXT,  
             sd.VALUE25 AS PM25,
@@ -490,8 +492,9 @@ module.exports.getData = (req, res) => {
               hl.ID,
               lw2.SKY_PM AS SKY,
               c.TEXT AS SKY_TEXT,
-              lw1.MIN, lw1.MAX,
-              lw2.RAIN_PM AS RAIN,
+              lw1.MIN, CONCAT(CONVERT(lw1.MIN, CHAR), '℃') AS MIN_TEXT,
+              lw1.MAX, CONCAT(CONVERT(lw1.MAX, CHAR), '℃') AS MAX_TEXT,
+              lw2.RAIN_PM AS RAIN, CONCAT(CONVERT(lw2.RAIN_PM, CHAR), '％') AS RAIN_TEXT,
               CONVERT(lw1.DATE_TIME, CHAR(10)) AS DATE
               FROM hardware_list hl
               LEFT JOIN area_list al ON hl.AREA_ID = al.ID
