@@ -24,7 +24,40 @@ module.exports.getResourceFileCheck = (req, res) => {
     res.send({ size });
   })
 }
+// 설정 정보 조회
+module.exports.getSetting = (req, res) => {
+  dbConnect(db => {
+    db.query(`
+      SELECT * FROM setting;
+    `, (err, result) => {
+      db.end();
+      if (err) {
+        console.log(err);
+        return res.send(fail('설정 정보 조회를 실패하였습니다.'));
+      }
+      res.send(result);
+    })
+  })
+}
+// 설정 정보 조회
+module.exports.getSettingDetail = (req, res) => {
+  const id = req?.params?.id;
 
+  dbConnect(db => {
+    db.query(`
+      SELECT * FROM setting WHERE WHO = '${id}';
+    `, (err, result) => {
+      db.end();
+      if (err) {
+        res.send(err);
+        console.log(err);
+        return res.send(fail('설정 정보 조회를 실패하였습니다.'));
+      }
+      if (result?.length === 0) return res.send(fail('설정 정보가 없습니다.'));
+      res.send(result[0]);
+    })
+  })
+}
 // 장비 리스트 조회
 module.exports.getDevice = (req, res) => {
   dbConnect(db => {

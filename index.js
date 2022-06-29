@@ -34,6 +34,8 @@ const {
   pageControl,
   getResourceFiles,
   getResourceFileCheck,
+  getSetting,
+  getSettingDetail,
 } = require('./server/api');
 
 // API
@@ -44,6 +46,8 @@ app.put('/api/modifyDevice/:id', modifyDevice);
 app.delete('/api/delDevice/:id', delDevice);
 app.get('/api/getLocation/:path', getLocation);
 app.get('/api/getStation/:path', getStation);
+app.get('/api/getSetting', getSetting);
+app.get('/api/getSetting/:id', getSettingDetail);
 app.get('/api/log', getLog);
 
 app.get('/api/pageControl', pageControl);
