@@ -5,6 +5,7 @@ const { log, fail, useDateFormat, dbConnect } = require('./hook');
 const fs = require('fs');
 const mime = require('mime');
 
+
 // 리소스 파일 다운로드
 module.exports.getResourceFiles = (req, res) => {
   const filePath = '/web/resource/build.zip';
@@ -13,6 +14,14 @@ module.exports.getResourceFiles = (req, res) => {
     if (err) return res.send(null);
     res.set({ 'Content-Type': fileType }).send(data);
   });
+}
+// 리소스 파일 체크
+module.exports.getResourceFileCheck = (req, res) => {
+  const filePath = __dirname + '/../resource/build.zip';
+  fs.readFile(filePath, (err, data) => {
+    if (err || !data) return res.send(null);
+    res.send(String(Buffer.byteLength(data)));
+  })
 }
 
 // 장비 리스트 조회

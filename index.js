@@ -33,6 +33,7 @@ const {
   getScreen,
   pageControl,
   getResourceFiles,
+  getResourceFileCheck,
 } = require('./server/api');
 
 // API
@@ -49,6 +50,7 @@ app.get('/api/pageControl', pageControl);
 app.get('/api/getScreen', getScreen);
 app.get('/api/getData', getData);
 
-app.get('/resource', getResourceFiles);
+app.get('/api/resource', getResourceFiles);
+app.get('/api/check', getResourceFileCheck);
 
 app.get('*', pageNotFound);
