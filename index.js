@@ -36,6 +36,8 @@ const {
   getResourceFileCheck,
   getSetting,
   getSettingDetail,
+  getUpdateInfo,
+  putHardwareUpdate,
 } = require('./server/api');
 
 // API
@@ -49,6 +51,8 @@ app.get('/api/getStation/:path', getStation);
 app.get('/api/getSetting', getSetting);
 app.get('/api/getSetting/:id', getSettingDetail);
 app.get('/api/log', getLog);
+app.get('/api/updateInfo/:id', getUpdateInfo);
+app.put('/api/hardwareUpdate/:id/:version/:isSuccess', putHardwareUpdate);
 
 app.get('/api/pageControl', pageControl);
 app.get('/api/getScreen', getScreen);

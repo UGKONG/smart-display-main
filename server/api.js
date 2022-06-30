@@ -49,12 +49,55 @@ module.exports.getSettingDetail = (req, res) => {
     `, (err, result) => {
       db.end();
       if (err) {
-        res.send(err);
         console.log(err);
         return res.send(fail('설정 정보 조회를 실패하였습니다.'));
       }
       if (result?.length === 0) return res.send(fail('설정 정보가 없습니다.'));
       res.send(result[0]);
+    })
+  })
+}
+// 업데이트 정보 조회
+module.exports.getUpdateInfo = (req, res) => {
+  const id = req?.params?.id;
+
+  dbConnect(db => {
+    db.query(`
+      SELECT VERSION, 
+      DATE_FORMAT(UPDATE_DT, '%Y-%m-%d %H:%i:%s') AS DATE
+      FROM resource_update ORDER BY ID LIMIT 1;
+      SELECT VERSION FROM hardware_list WHERE ID = '${id}';
+    `, (err, result) => {
+      db.end();
+      if (err) {
+        console.log(err);
+        return res.send(fail('업데이트 정보 조회를 실패하였습니다.'));
+      }
+      
+      let [admin, hardware] = result;
+      if (!admin[0]) return res.send(fail('업데이트 정보가 없습니다.'));
+      if (!hardware[0]) return res.send(fail('장비 정보가 없습니다.'));
+      admin = admin[0];
+      hardware = hardware[0];
+      res.send({ admin, hardware });
+    })
+  })
+}
+// 장비 업데이트 정보 갱신
+module.exports.putHardwareUpdate = (req, res) => {
+  const { id, version, isSuccess } = req?.params;
+  if (isSuccess == 0) return res.send(fail('업데이트를 실패하였습니다.'));
+
+  dbConnect(db => {
+    db.query(`
+      UPDATE hardware_list SET VERSION = ${version} WHERE ID = ${id};
+    `, (err, result) => {
+      db.end();
+      if (err) {
+        console.log(err);
+        return res.send(fail('업데이트를 실패하였습니다.'));
+      }
+      res.send(true);
     })
   })
 }
