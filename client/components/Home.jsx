@@ -17,7 +17,7 @@ export default function () {
   ]);
 
   const GET = () => {
-    axios.get('/api/isConnect').then(({ data }) => {
+    axios.get('http://smartpole.enwiser.com/api/isConnect').then(({ data }) => {
       setIsDbConn(data?.result);
       setIp(data?.ip);
       

@@ -8,7 +8,7 @@ export default function () {
   const [isLoad, setIsLoad] = React.useState(true);
 
   const GET = () => {
-    axios.get('/api/log').then(({ data }) => {
+    axios.get('http://smartpole.enwiser.com/api/log').then(({ data }) => {
       setList(data);
       setIsLoad(false);
     });

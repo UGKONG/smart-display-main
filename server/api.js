@@ -45,7 +45,7 @@ module.exports.getSettingDetail = (req, res) => {
 
   dbConnect(db => {
     db.query(`
-      SELECT * FROM setting WHERE WHO = '${id}';
+      SELECT * FROM setting WHERE GROUP_ID = '${id}';
     `, (err, result) => {
       db.end();
       if (err) {

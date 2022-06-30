@@ -25,7 +25,7 @@ export default function () {
   }
 
   const getList = () => {
-    axios.get('/api/getDevice').then(({ data }) => {
+    axios.get('http://smartpole.enwiser.com/api/getDevice').then(({ data }) => {
       setList(data);
       setIsLoad(false);
     })
@@ -89,10 +89,10 @@ export default function () {
         { isEdit !== null && isEdit === 0 && <h2>장비 등록</h2> }
         { isEdit !== null && isEdit > 0 && <h2>장비 수정</h2> }
         <span>
-          { isEdit === null && <button onClick={add}>장비등록</button> }
-          { isEdit !== null && isEdit === 0 && <button onClick={save}>등록</button>}
+          {/* { isEdit === null && <button onClick={add}>장비등록</button> } */}
+          {/* { isEdit !== null && isEdit === 0 && <button onClick={save}>등록</button>}
           { isEdit !== null && isEdit > 0 && <button onClick={save}>수정</button>}
-          { isEdit !== null && <button onClick={() => setIsEdit(null)}>취소</button> }
+          { isEdit !== null && <button onClick={() => setIsEdit(null)}>취소</button> } */}
         </span>
       </OptionBar>
       {isEdit === null && (
@@ -106,10 +106,10 @@ export default function () {
               <p>담당: {item.AGENT}</p>
               <p>메모: {item.DESCRIPTION}</p>
               <p>등록일: {item.CREATE_DATE}</p>
-              <ButtonContainer>
+              {/* <ButtonContainer>
                 <button data-id={item.ID} onClick={modify}>수정</button>
                 <button data-id={item.ID} onClick={remove}>삭제</button>
-              </ButtonContainer>
+              </ButtonContainer> */}
             </List>
           ))}
         </Device>
