@@ -15,15 +15,6 @@ module.exports.getResourceFiles = (req, res) => {
     res.set({ 'Content-Type': fileType }).send(data);
   });
 }
-// 리소스 파일 체크
-module.exports.getResourceFileCheck = (req, res) => {
-  const filePath = __dirname + '/../resource/build.zip';
-  fs.readFile(filePath, (err, data) => {
-    if (err || !data) return res.send(null);
-    let size = Buffer.byteLength(data);
-    res.send({ size });
-  })
-}
 // 설정 정보 조회
 module.exports.getSetting = (req, res) => {
   dbConnect(db => {

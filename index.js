@@ -33,7 +33,6 @@ const {
   getScreen,
   pageControl,
   getResourceFiles,
-  getResourceFileCheck,
   getSetting,
   getSettingDetail,
   getUpdateInfo,
@@ -59,6 +58,5 @@ app.get('/api/getScreen', getScreen);
 app.get('/api/getData', getData);
 
 app.get('/api/resource', getResourceFiles);
-app.get('/api/check', getResourceFileCheck);
 
 app.get('*', pageNotFound);
