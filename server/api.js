@@ -370,18 +370,17 @@ module.exports.getScreen = (req, res) => {
   dbConnect(db => {
     db.query(`
       SELECT
-      scr.ID, scr.NAME, scr.WIDTH, scr.HEIGHT, pc.PAGE_ID, pc.ORDER, c.TEXT AS DEFAULT_PAGE
-      FROM page_control pc
-      LEFT JOIN screen scr ON pc.SCREEN_ID = scr.ID
-      LEFT JOIN common c ON pc.PAGE_ID = c.CODE AND c.CURRENT = 5
-      WHERE pc.HARDWARE_ID = '${id}' AND pc.ORDER = 1
+      scr.ID, scr.NAME, scr.WIDTH, scr.HEIGHT, pc.PAGE_ID, pc.ORDER, pc.ID AS DEFAULT_PAGE
+      FROM screen scr 
+      LEFT JOIN page_control pc ON pc.SCREEN_ID = scr.ID AND pc.ORDER = 1
+      WHERE pc.HARDWARE_ID = '${id}'
       GROUP BY scr.ID
       ORDER BY pc.ORDER ASC, scr.ID;
     `, (err, result) => {
       db.end();
       if (err || result.length === 0) return res.send(fail('설정된 스크린이 없습니다.'));
       result = result.map(item => {
-        item.DEFAULT_PAGE = '/' + item.DEFAULT_PAGE.toLowerCase();
+        item.DEFAULT_PAGE = '/' + item.DEFAULT_PAGE;
         return item;
       });
       res.send(result);
@@ -401,7 +400,8 @@ module.exports.getData = (req, res) => {
     db.query(`
       SELECT
       pc.ID, pc.SCREEN_ID, scr.NAME AS SCREEN_NAME, scr.WIDTH AS SCREEN_WIDTH, scr.HEIGHT AS SCREEN_HEIGHT, pc.ORDER,
-      pc.PAGE_ID, pc.TIMER, pc.MEDIA_URL, pg.NAME AS PAGE_NAME, pg.TITLE AS PAGE_TITLE, pg.DEFAULT_TIMER AS PAGE_DEFAULT_TIMER, pg.DESCRIPTION AS PAGE_DESCRIPTION
+      pc.PAGE_ID, pc.TIMER, pc.MEDIA_URL, pg.NAME AS PAGE_NAME, pg.TITLE AS PAGE_TITLE, pg.DEFAULT_TIMER AS PAGE_DEFAULT_TIMER, pg.DESCRIPTION AS PAGE_DESCRIPTION,
+      pg.TYPE
       FROM hardware_list hl
       LEFT JOIN page_control pc ON hl.ID = pc.HARDWARE_ID
       LEFT JOIN screen scr ON pc.SCREEN_ID = scr.ID
