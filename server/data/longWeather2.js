@@ -107,15 +107,17 @@ module.exports = {
     let insertSQL = [];
 
     resultArr.forEach(item => {
-      item.skyAM = item.skyAM === '맑음' ? 1 : (item.skyAM === '구름많음' || item.skyAM === '구름많고 비' || item.skyAM === '구름많고 눈' || item.skyAM === '구름많고 비/눈' || item.skyAM === '구름많고 소나기') ? 3 : 4;
-      item.skyPM = item.skyPM === '맑음' ? 1 : (item.skyPM === '구름많음' || item.skyPM === '구름많고 비' || item.skyPM === '구름많고 눈' || item.skyPM === '구름많고 비/눈' || item.skyPM === '구름많고 소나기') ? 3 : 4;
-      insertSQL.push(`('${areaCode}','${item.date} 00:00:00',${item.rainAM},${item.rainPM},'${item.skyAM}','${item.skyPM}','${time}','${date}','${useNow()}')`);
+      let ptyAM = (item?.skyAM?.indexOf('비') > -1 || item?.skyAM?.indexOf('소나기') > -1 || item?.skyAM?.indexOf('빗방울') > -1) ? 1 : item?.skyAM?.indexOf('눈') > -1 ? 3 : 0;
+      let ptyPM = (item?.skyPM?.indexOf('비') > -1 || item?.skyPM?.indexOf('소나기') > -1 || item?.skyPM?.indexOf('빗방울') > -1) ? 1 : item?.skyPM?.indexOf('눈') > -1 ? 3 : 0;
+      item.skyAM = item.skyAM === '맑음' ? 1 : (item.skyAM?.indexOf('구름') > -1) ? 3 : 4;
+      item.skyPM = item.skyPM === '맑음' ? 1 : (item.skyPM?.indexOf('구름') > -1) ? 3 : 4;
+      insertSQL.push(`('${areaCode}','${item.date} 00:00:00',${item.rainAM},${item.rainPM},'${item.skyAM}','${item.skyPM}','${ptyAM}','${ptyPM}','${time}','${date}','${useNow()}')`);
     });
 
     dbConnect(db => {
       db.query(`
         INSERT INTO long_weather2
-        (AREA_CODE,DATE_TIME,RAIN_AM,RAIN_PM,SKY_AM,SKY_PM,BASE_TM,BASE_DT,CHECK_DT)
+        (AREA_CODE,DATE_TIME,RAIN_AM,RAIN_PM,SKY_AM,SKY_PM,PTY_AM,PTY_PM,BASE_TM,BASE_DT,CHECK_DT)
         VALUES
         ${insertSQL.join(',')}
         ON DUPLICATE KEY UPDATE

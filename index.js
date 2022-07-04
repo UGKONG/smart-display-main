@@ -7,7 +7,7 @@ const app = express();
 // 엔진 셋팅
 app.use(require('cors')());
 app.use('/', express.static(__dirname + '/client/build'));
-// app.use('/resources', express.static(__dirname + '/resources/build.zip'));
+app.use('/files', express.static(__dirname + '/resource/files'));
 
 // 서버엔진, 데이터베이스 내보내기
 module.exports = { app };
